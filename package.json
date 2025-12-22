@@ -1,7 +1,7 @@
 {
   "name": "webpack-template",
   "version": "1.0.0",
-  "description": "Template repo for projects using webpack — REPLACE THIS DESCRIPTION for your project",
+  "description": "Battleship game - educational project (part of The Odin Project)",
   "main": "index.js",
   "scripts": {
     "test": "jest",
