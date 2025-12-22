@@ -1,0 +1,41 @@
+{
+  "name": "webpack-template",
+  "version": "1.0.0",
+  "description": "Template repo for projects using webpack — REPLACE THIS DESCRIPTION for your project",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "dev": "webpack serve",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "lint-and-format": "npm run lint:fix && npm run format",
+    "build": "webpack",
+    "deploy": "gh-pages -d dist"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bartek8b/webpack-template.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bartek8b/webpack-template/issues"
+  },
+  "homepage": "https://github.com/bartek8b/webpack-template#readme",
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "css-loader": "^7.1.2",
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^16.3.0",
+    "html-loader": "^5.1.0",
+    "html-webpack-plugin": "^5.6.5",
+    "prettier": "^3.7.2",
+    "style-loader": "^4.0.0",
+    "webpack": "^5.104.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-dev-server": "^5.2.2"
+  }
+}
