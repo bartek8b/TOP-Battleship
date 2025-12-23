@@ -1,4 +1,5 @@
 import { Gameboard } from './gameboard.js';
+import { Ship } from './ship.js';
 
 describe('Gameboard', () => {
   test('Grid have length 10', () => {
@@ -24,31 +25,37 @@ describe('Gameboard', () => {
 
   test('Ship with 0 length cannot be placed', () => {
     const gameboard = new Gameboard();
-    expect(() => gameboard.placeShip(0, 1, 2)).toThrow();
+    const ship = new Ship(0);
+    expect(() => gameboard.placeShip(ship, 1, 2)).toThrow();
   });
 
   test('Ship with 5 length cannot be placed', () => {
     const gameboard = new Gameboard();
-    expect(() => gameboard.placeShip(5, 1, 2)).toThrow();
+    const ship = new Ship(5);
+    expect(() => gameboard.placeShip(ship, 1, 2)).toThrow();
   });
 
   test('Ship with row -1 cannot be placed', () => {
     const gameboard = new Gameboard();
-    expect(() => gameboard.placeShip(1, -1, 2)).toThrow();
+    const ship = new Ship(1);
+    expect(() => gameboard.placeShip(ship, -1, 2)).toThrow();
   });
 
   test('Ship with row 10 length cannot be placed', () => {
     const gameboard = new Gameboard();
-    expect(() => gameboard.placeShip(1, 10, 2)).toThrow();
+    const ship = new Ship(1);
+    expect(() => gameboard.placeShip(ship, 10, 2)).toThrow();
   });
 
   test('Ship with col -1 length cannot be placed', () => {
     const gameboard = new Gameboard();
-    expect(() => gameboard.placeShip(2, 2, -1)).toThrow();
+    const ship = new Ship(4);
+    expect(() => gameboard.placeShip(ship, 2, -1)).toThrow();
   });
 
   test('Ship with col 10 length cannot be placed', () => {
     const gameboard = new Gameboard();
-    expect(() => gameboard.placeShip(3, 3, 10)).toThrow();
+    const ship = new Ship(3);
+    expect(() => gameboard.placeShip(ship, 3, 10)).toThrow();
   });
 });
