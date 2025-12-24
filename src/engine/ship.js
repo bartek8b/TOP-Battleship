@@ -1,9 +1,10 @@
 export class Ship {
-  constructor(length) {
+  constructor(length, vertical = false) {
     if (length < 1 || length > 4) {
       throw new Error('Ship length must be between 1 & 4');
     }
     this.length = length;
+    this.vertical = vertical;
     this.hitsReceived = 0;
   }
 
