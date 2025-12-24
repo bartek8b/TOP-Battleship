@@ -46,4 +46,37 @@ describe('Gameboard', () => {
     const ship = new Ship(3);
     expect(() => gameboard.placeShip(ship, 3, 10)).toThrow();
   });
+
+  test('Horizontal ship is well placed on gameboard', () => {
+    const gameboard = new Gameboard();
+    const ship = new Ship(4);
+    gameboard.placeShip(ship, 0, 6);
+    expect(gameboard.grid[0][6]).toBe(ship);
+    expect(gameboard.grid[0][7]).toBe(ship);
+    expect(gameboard.grid[0][8]).toBe(ship);
+    expect(gameboard.grid[0][9]).toBe(ship);
+  });
+
+  test('Vertical ship is well placed on gameboard', () => {
+    const gameboard = new Gameboard();
+    // True must be provided (for this.vertical)
+    const ship = new Ship(4, true);
+    gameboard.placeShip(ship, 6, 0);
+    expect(gameboard.grid[6][0]).toBe(ship);
+    expect(gameboard.grid[7][0]).toBe(ship);
+    expect(gameboard.grid[8][0]).toBe(ship);
+    expect(gameboard.grid[9][0]).toBe(ship);
+  });
+
+  test('Horizontal ship placed out of bounds throws', () => {
+    const gameboard = new Gameboard();
+    const ship = new Ship(3);
+    expect(() => gameboard.placeShip(ship, 0, 8)).toThrow();
+  });
+
+  test('Vertical ship placed out of bounds throws', () => {
+    const gameboard = new Gameboard();
+    const ship = new Ship(2, true);
+    expect(() => gameboard.placeShip(ship, 9, 0)).toThrow();
+  });
 });
