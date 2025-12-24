@@ -6,6 +6,11 @@ export class Ship {
     this.length = length;
     this.vertical = vertical;
     this.hitsReceived = 0;
+
+    if (this.length === 4) this.type = 'battleship';
+    else if (this.length === 3) this.type = 'cruiser';
+    else if (this.length === 2) this.type = 'destroyer';
+    else if (this.length === 1) this.type = 'submarine';
   }
 
   hit() {
