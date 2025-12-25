@@ -1,6 +1,13 @@
 export class Gameboard {
   constructor() {
     this.grid = Array.from({ length: 10 }, () => Array(10).fill(null));
+
+    this.shipsAvailable = {
+      4: 1,
+      3: 2,
+      2: 3,
+      1: 4,
+    };
   }
 
   // Helper to check if neighbour cell is null or if even exists (is out of bounds)
@@ -30,6 +37,15 @@ export class Gameboard {
   }
 
   placeShip(ship, row, col) {
+    if (
+      !this.shipsAvailable[ship.length] ||
+      this.shipsAvailable[ship.length] === 0
+    ) {
+      throw new Error(
+        `All the ships with length of ${ship.length} are already palced`,
+      );
+    }
+
     // Check if provided arguments are in bounds
     if (row < 0 || row > 9) {
       throw new Error('The row index is out of bounds');
@@ -65,5 +81,6 @@ export class Gameboard {
         throw new Error('Cannot place ship out of bounds');
       }
     }
+    this.shipsAvailable[ship.length]--;
   }
 }

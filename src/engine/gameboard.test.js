@@ -141,4 +141,13 @@ describe('Gameboard', () => {
     // Try to place new ship which don't touch ship1 even with its corner
     expect(gameboard.canPlaceShip(ship2, 8, 2)).toBe(true);
   });
+
+  test('Cannot place more ships of the same type than stated in shipsAvailable object', () => {
+    const gameboard = new Gameboard();
+    const ship1 = new Ship(4);
+    const ship2 = new Ship(4);
+    gameboard.placeShip(ship1, 0, 0);
+    expect(gameboard.shipsAvailable[ship1.length]).toBe(0);
+    expect(() => gameboard.placeShip(ship2, 2, 0)).toThrow();
+  });
 });
