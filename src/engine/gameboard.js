@@ -3,6 +3,7 @@ export class Gameboard {
     this.grid = Array.from({ length: 10 }, () => Array(10).fill(null));
 
     this.shipsAvailable = {
+      // Legnth of ship: amount of ships in fleet
       4: 1,
       3: 2,
       2: 3,
@@ -37,6 +38,7 @@ export class Gameboard {
   }
 
   placeShip(ship, row, col) {
+    // Check if player went out of ships of certain type
     if (
       !this.shipsAvailable[ship.length] ||
       this.shipsAvailable[ship.length] === 0
@@ -81,6 +83,7 @@ export class Gameboard {
         throw new Error('Cannot place ship out of bounds');
       }
     }
+    // Decrement amount of available ships of certain type
     this.shipsAvailable[ship.length]--;
   }
 }
