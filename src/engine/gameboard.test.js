@@ -177,4 +177,19 @@ describe('Gameboard', () => {
     expect(() => gameboard.receiveAttack(0, 1)).toThrow();
     expect(() => gameboard.receiveAttack(0, 2)).toThrow();
   });
+
+  test('Properly tracks accurate shot', () => {
+    const gameboard = new Gameboard();
+    // Call allSipsSunk on empty gameboard
+    expect(gameboard.allShipsSunk()).toBe(false);
+    const ship1 = new Ship(1);
+    const ship2 = new Ship(2, true);
+    gameboard.placeShip(ship1, 0, 1);
+    gameboard.placeShip(ship2, 8, 9);
+    gameboard.receiveAttack(0, 1);
+    expect(gameboard.allShipsSunk()).toBe(false);
+    gameboard.receiveAttack(8, 9);
+    gameboard.receiveAttack(9, 9);
+    expect(gameboard.allShipsSunk()).toBe(true);
+  });
 });

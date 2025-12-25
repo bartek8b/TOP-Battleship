@@ -11,6 +11,9 @@ export class Gameboard {
       2: 3,
       1: 4,
     };
+
+    // List of ships placed on this board, used by allShipsSunk()
+    this.fleet = [];
   }
 
   // Helper to check if given cell is empty or nonexistent (out of bounds)
@@ -83,8 +86,12 @@ export class Gameboard {
         throw new Error('Cannot place ship out of bounds');
       }
     }
+
     // Decrement amount of available ships of certain type
     this.shipsAvailable[ship.length]--;
+
+    // Push ship into fleet array
+    this.fleet.push(ship);
   }
 
   receiveAttack(row, col) {
@@ -99,5 +106,9 @@ export class Gameboard {
       ship.hit();
       this.grid[row][col] = 'hit';
     } else this.grid[row][col] = 'miss';
+  }
+
+  allShipsSunk() {
+    return this.fleet.length > 0 && this.fleet.every((ship) => ship.isSunk());
   }
 }
