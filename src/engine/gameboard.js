@@ -3,7 +3,7 @@ export class Gameboard {
     this.grid = Array.from({ length: 10 }, () => Array(10).fill(null));
 
     this.shipsAvailable = {
-      // Legnth of ship: amount of ships in fleet
+      // Legnht of ship: amount of ships in fleet
       4: 1,
       3: 2,
       2: 3,
@@ -11,7 +11,8 @@ export class Gameboard {
     };
   }
 
-  // Helper to check if neighbour cell is null or if even exists (is out of bounds)
+  // Helper to check if given cell is empty or nonexistent (out of bounds)
+
   isEmptyOrNull(row, col) {
     if (row < 0 || row > 9 || col < 0 || col > 9) return true; // out of bounds = OK, ship can be placed on bound
     return this.grid[row][col] === null;
