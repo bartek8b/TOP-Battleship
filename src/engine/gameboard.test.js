@@ -150,4 +150,31 @@ describe('Gameboard', () => {
     expect(gameboard.shipsAvailable[ship1.length]).toBe(0);
     expect(() => gameboard.placeShip(ship2, 2, 0)).toThrow();
   });
+
+  test('Cannot shot out of bounds', () => {
+    const gameboard = new Gameboard();
+    expect(() => gameboard.receiveAttack(-1, 0)).toThrow();
+    expect(() => gameboard.receiveAttack(0, 10)).toThrow();
+    expect(() => gameboard.receiveAttack(10, 5)).toThrow();
+    expect(() => gameboard.receiveAttack(5, -1)).toThrow();
+  });
+
+  test('Properly tracks missed shot', () => {
+    const gameboard = new Gameboard();
+    gameboard.receiveAttack(0, 1);
+    expect(gameboard.grid[0][1]).toBe('miss');
+  });
+
+  test('Properly tracks accurate shot', () => {
+    const gameboard = new Gameboard();
+    const ship = new Ship(1);
+    gameboard.placeShip(ship, 0, 1);
+    gameboard.receiveAttack(0, 1);
+    gameboard.receiveAttack(0, 2);
+    expect(gameboard.grid[0][1]).toBe('hit');
+    expect(gameboard.grid[0][2]).toBe('miss');
+    // Another shots into same cells
+    expect(() => gameboard.receiveAttack(0, 1)).toThrow();
+    expect(() => gameboard.receiveAttack(0, 2)).toThrow();
+  });
 });

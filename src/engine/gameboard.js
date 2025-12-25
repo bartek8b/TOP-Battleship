@@ -1,3 +1,5 @@
+import { Ship } from './ship.js';
+
 export class Gameboard {
   constructor() {
     this.grid = Array.from({ length: 10 }, () => Array(10).fill(null));
@@ -43,19 +45,16 @@ export class Gameboard {
     if (
       !this.shipsAvailable[ship.length] ||
       this.shipsAvailable[ship.length] === 0
-    ) {
+    )
       throw new Error(
         `All the ships with length of ${ship.length} are already palced`,
       );
-    }
 
     // Check if provided arguments are in bounds
-    if (row < 0 || row > 9) {
-      throw new Error('The row index is out of bounds');
-    }
-    if (col < 0 || col > 9) {
+    if (row < 0 || row > 9) throw new Error('The row index is out of bounds');
+
+    if (col < 0 || col > 9)
       throw new Error('The column index is out of bounds');
-    }
 
     // Check if horizontal ship isn't out of bounds / overlap other ship / touch other ship
     if (ship.vertical === false) {
@@ -86,5 +85,18 @@ export class Gameboard {
     }
     // Decrement amount of available ships of certain type
     this.shipsAvailable[ship.length]--;
+  }
+
+  receiveAttack(row, col) {
+    if (row < 0 || row > 9 || col < 0 || col > 9)
+      throw new Error('Cannot shot out of bounds');
+
+    if (this.grid[row][col] === 'hit' || this.grid[row][col] === 'miss')
+      throw new Error('Cannot shot same cell twice');
+
+    if (this.grid[row][col] instanceof Ship) {
+      this.grid[row][col].hit();
+      this.grid[row][col] = 'hit';
+    } else this.grid[row][col] = 'miss';
   }
 }
