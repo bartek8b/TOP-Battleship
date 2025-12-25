@@ -3,7 +3,7 @@ export class Gameboard {
     this.grid = Array.from({ length: 10 }, () => Array(10).fill(null));
 
     this.shipsAvailable = {
-      // Legnht of ship: amount of ships in fleet
+      // Length of ship: amount of ships in fleet
       4: 1,
       3: 2,
       2: 3,
