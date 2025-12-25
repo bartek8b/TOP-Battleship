@@ -79,4 +79,66 @@ describe('Gameboard', () => {
     const ship = new Ship(2, true);
     expect(() => gameboard.placeShip(ship, 9, 0)).toThrow();
   });
+
+  test('isEmptyOrNull returns true for empty cells', () => {
+    const gameboard = new Gameboard();
+    expect(gameboard.isEmptyOrNull(0, 0)).toBe(true);
+    expect(gameboard.isEmptyOrNull(9, 9)).toBe(true);
+  });
+
+  test('isEmptyOrNull returns false for occupied cells', () => {
+    const gameboard = new Gameboard();
+    const ship = new Ship(1);
+    gameboard.placeShip(ship, 3, 3);
+    expect(gameboard.isEmptyOrNull(3, 3)).toBe(false);
+  });
+
+  test('isEmptyOrNull returns true for out of bounds', () => {
+    const gameboard = new Gameboard();
+    expect(gameboard.isEmptyOrNull(-1, 0)).toBe(true);
+    expect(gameboard.isEmptyOrNull(0, -1)).toBe(true);
+    expect(gameboard.isEmptyOrNull(10, 0)).toBe(true);
+    expect(gameboard.isEmptyOrNull(0, 10)).toBe(true);
+  });
+
+  test('canPlaceShip returns false if ship would overlap', () => {
+    const gameboard = new Gameboard();
+    const ship1 = new Ship(2);
+    const ship2 = new Ship(3);
+    gameboard.placeShip(ship1, 5, 5);
+    expect(gameboard.canPlaceShip(ship2, 5, 5)).toBe(false); // Collision
+    expect(gameboard.canPlaceShip(ship2, 4, 5)).toBe(false); // Touch
+    expect(gameboard.canPlaceShip(ship2, 6, 4)).toBe(false); // Touch
+  });
+
+  test('canPlaceShip returns true only if ship and neighbours are free', () => {
+    const gameboard = new Gameboard();
+    const ship1 = new Ship(2);
+    gameboard.placeShip(ship1, 0, 0);
+    // New ship away from ship1
+    const ship2 = new Ship(3);
+    expect(gameboard.canPlaceShip(ship2, 3, 3)).toBe(true);
+  });
+
+  test('canPlaceShip blocks placing ships next to each other horizontally', () => {
+    const gameboard = new Gameboard();
+    const ship1 = new Ship(3);
+    gameboard.placeShip(ship1, 4, 4);
+    // Try to place new ship touching ship1
+    const ship2 = new Ship(2);
+    expect(gameboard.canPlaceShip(ship2, 4, 7)).toBe(false);
+    // Try to place new ship which don't touch ship1 even with its corner
+    expect(gameboard.canPlaceShip(ship2, 4, 8)).toBe(true);
+  });
+
+  test('canPlaceShip blocks placing ships next to each other vertically', () => {
+    const gameboard = new Gameboard();
+    const ship1 = new Ship(4, true);
+    gameboard.placeShip(ship1, 2, 2);
+    const ship2 = new Ship(2, true);
+    // Try to place new ship touching ship1
+    expect(gameboard.canPlaceShip(ship2, 6, 2)).toBe(false);
+    // Try to place new ship which don't touch ship1 even with its corner
+    expect(gameboard.canPlaceShip(ship2, 8, 2)).toBe(true);
+  });
 });
