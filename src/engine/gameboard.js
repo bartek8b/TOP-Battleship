@@ -95,7 +95,8 @@ export class Gameboard {
       throw new Error('Cannot shot same cell twice');
 
     if (this.grid[row][col] instanceof Ship) {
-      this.grid[row][col].hit();
+      const ship = this.grid[row][col];
+      ship.hit();
       this.grid[row][col] = 'hit';
     } else this.grid[row][col] = 'miss';
   }
