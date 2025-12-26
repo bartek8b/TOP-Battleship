@@ -30,24 +30,26 @@ export class Player {
 export class CPU extends Player {
   constructor() {
     super();
+    // 'random' if prev shot inaccurate or 'target' if opposite
     this.mode = 'random';
-    this.lastHits = [];
+    this.possibleMoves = [];
+    for (let row = 0; row < 10; row++) {
+      for (let col = 0; col < 10; col++) {
+        this.possibleMoves.push([row, col]);
+      }
+    }
   }
 
   // Helper if no ship hit
   randomAttack(enemyBoard) {
-    let attackSuccess = false;
-    while (!attackSuccess) {
-      const row = getRandomIntBetween(0, 9);
-      const col = getRandomIntBetween(0, 9);
-      try {
-        enemyBoard.receiveAttack(row, col);
-        // Will not be executed when error is catched
-        attackSuccess = true;
-      } catch {
-        // Repeat if attack taken cell
-      }
+    if (this.possibleMoves.length === 0) {
+      throw new Error('No moves left');
     }
+    const idx = getRandomIntBetween(0, this.possibleMoves.length - 1);
+    const [row, col] = this.possibleMoves.splice(idx, 1)[0];
+    const shot = enemyBoard.receiveAttack(row, col);
+    // Switch to target mode only if ship is hit but hasn't sunk yet
+    if (shot instanceof Ship && !shot.isSunk()) this.mode = 'target';
   }
 
   // Helper for inteligent attack when ship hit
