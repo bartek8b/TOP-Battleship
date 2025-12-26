@@ -17,7 +17,6 @@ export class Gameboard {
   }
 
   // Helper to check if given cell is empty or nonexistent (out of bounds)
-
   isEmptyOrNull(row, col) {
     if (row < 0 || row > 9 || col < 0 || col > 9) return true; // out of bounds = OK, ship can be placed on bound
     return this.grid[row][col] === null;
