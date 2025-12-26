@@ -1,6 +1,6 @@
 import { Gameboard } from './gameboard.js';
 import { Ship } from './ship.js';
-import { getRandomIntBetween } from './utils/utils.js';
+import { getRandomIntBetween } from './utils.js';
 
 export class Player {
   constructor() {
@@ -35,7 +35,20 @@ export class CPU extends Player {
   }
 
   // Helper if no ship hit
-  randomAttack(enemyBoard) {}
+  randomAttack(enemyBoard) {
+    let attackSuccess = false;
+    while (!attackSuccess) {
+      const row = getRandomIntBetween(0, 9);
+      const col = getRandomIntBetween(0, 9);
+      try {
+        enemyBoard.receiveAttack(row, col);
+        // Will not be executed when error is catched
+        attackSuccess = true;
+      } catch {
+        // Repeat if attack taken cell
+      }
+    }
+  }
 
   // Helper for inteligent attack when ship hit
   targetAttack(enemyBoard) {}
