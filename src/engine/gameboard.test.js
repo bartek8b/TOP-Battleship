@@ -2,6 +2,24 @@ import { Gameboard } from './gameboard.js';
 import { Ship } from './ship.js';
 
 describe('Gameboard', () => {
+  test('Init & reset', () => {
+    const gameboard = new Gameboard();
+    const ship = new Ship(2, true);
+
+    gameboard.placeShip(ship, 5, 5);
+    expect(gameboard.fleet.length).toBe(1);
+    expect(gameboard.fleet[0]).toBe(ship);
+    expect(gameboard.fleet[1]).toBe(undefined);
+    expect(gameboard.grid[5][5]).toBe(ship);
+    expect(gameboard.grid[6][5]).toBe(ship);
+    
+    gameboard.reset();
+    expect(gameboard.fleet.length).toBe(0);
+    expect(gameboard.fleet[0]).toBe(undefined);
+    expect(gameboard.grid[5][5]).toBe(null);
+    expect(gameboard.grid[6][5]).toBe(null);
+  });
+
   test('Grid have length 10', () => {
     const gameboard = new Gameboard();
     expect(gameboard.grid.length).toBe(10);
