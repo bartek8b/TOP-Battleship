@@ -16,11 +16,24 @@ export class Game {
 
   // Automated CPU attack
   cpuMove() {
-    return this.cpu.attack(this.player1.gameboard);
+    const shot = this.cpu.attack(this.player1.gameboard);
+    if (this.player1.gameboard.allShipsSunk())
+      return { gameResult: 'CPU wins!' };
+    if (shot.ship) return this.cpuMove();
+    else {
+      this.onTheMove = this.player1;
+      return shot;
+    }
   }
 
   // Coordinates delivered by UI
   player1Move(row, col) {
-    return this.cpu.gameboard.receiveAttack(row, col);
+    const shot = this.cpu.gameboard.receiveAttack(row, col);
+    if (this.cpu.gameboard.allShipsSunk())
+      return { gameResult: 'Player 1 wins!' };
+    else {
+      this.onTheMove = this.cpu;
+      return shot;
+    }
   }
 }
