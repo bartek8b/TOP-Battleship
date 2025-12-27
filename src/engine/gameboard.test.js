@@ -12,7 +12,7 @@ describe('Gameboard', () => {
     expect(gameboard.fleet[1]).toBe(undefined);
     expect(gameboard.grid[5][5]).toBe(ship);
     expect(gameboard.grid[6][5]).toBe(ship);
-    
+
     gameboard.reset();
     expect(gameboard.fleet.length).toBe(0);
     expect(gameboard.fleet[0]).toBe(undefined);
@@ -179,24 +179,26 @@ describe('Gameboard', () => {
 
   test('Properly tracks missed shot', () => {
     const gameboard = new Gameboard();
-    gameboard.receiveAttack(0, 1);
+    expect(gameboard.receiveAttack(0, 1)).toEqual({ result: 'miss' });
     expect(gameboard.grid[0][1]).toBe('miss');
   });
 
   test('Properly tracks accurate shot', () => {
     const gameboard = new Gameboard();
-    const ship = new Ship(1);
+    const ship = new Ship(2);
     gameboard.placeShip(ship, 0, 1);
-    gameboard.receiveAttack(0, 1);
-    gameboard.receiveAttack(0, 2);
+    expect(gameboard.receiveAttack(0, 1)).toEqual({ result: 'hit', ship });
+    expect(gameboard.receiveAttack(0, 2)).toEqual({ result: 'sunk', ship });
+    expect(gameboard.receiveAttack(0, 5)).toEqual({ result: 'miss' });
     expect(gameboard.grid[0][1]).toBe('hit');
-    expect(gameboard.grid[0][2]).toBe('miss');
+    expect(gameboard.grid[0][2]).toBe('hit');
+    expect(gameboard.grid[0][5]).toBe('miss');
     // Another shots into same cells
     expect(() => gameboard.receiveAttack(0, 1)).toThrow();
     expect(() => gameboard.receiveAttack(0, 2)).toThrow();
   });
 
-  test('Properly tracks accurate shot', () => {
+  test('Properly checks if all ships are sunk', () => {
     const gameboard = new Gameboard();
     // Call allSipsSunk on empty gameboard
     expect(gameboard.allShipsSunk()).toBe(false);

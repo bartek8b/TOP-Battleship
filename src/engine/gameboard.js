@@ -109,7 +109,11 @@ export class Gameboard {
       const ship = this.grid[row][col];
       ship.hit();
       this.grid[row][col] = 'hit';
-    } else this.grid[row][col] = 'miss';
+      return ship.isSunk() ? { result: 'sunk', ship } : { result: 'hit', ship };
+    } else {
+      this.grid[row][col] = 'miss';
+      return { result: 'miss' };
+    }
   }
 
   allShipsSunk() {
