@@ -187,8 +187,14 @@ describe('Gameboard', () => {
     const gameboard = new Gameboard();
     const ship = new Ship(2);
     gameboard.placeShip(ship, 0, 1);
-    expect(gameboard.receiveAttack(0, 1)).toEqual({ result: 'hit', ship });
-    expect(gameboard.receiveAttack(0, 2)).toEqual({ result: 'sunk', ship });
+    expect(gameboard.receiveAttack(0, 1)).toEqual({
+      result: 'hit',
+      ship: 'destroyer',
+    });
+    expect(gameboard.receiveAttack(0, 2)).toEqual({
+      result: 'sunk',
+      ship: 'destroyer',
+    });
     expect(gameboard.receiveAttack(0, 5)).toEqual({ result: 'miss' });
     expect(gameboard.grid[0][1]).toBe('hit');
     expect(gameboard.grid[0][2]).toBe('hit');
