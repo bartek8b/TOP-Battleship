@@ -19,7 +19,7 @@ export class Game {
     const shot = this.cpu.attack(this.player1.gameboard);
     if (this.player1.gameboard.allShipsSunk())
       return { gameResult: 'CPU wins!' };
-    if (shot.ship) return this.cpuMove();
+    if (shot?.ship) return this.cpuMove();
     else {
       this.onTheMove = this.player1;
       return shot;
