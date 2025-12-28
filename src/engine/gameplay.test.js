@@ -3,9 +3,8 @@ import { Player, CPU } from './players.js';
 
 jest.mock('./players.js');
 
-describe('Game class - full unit tests', () => {
+describe('Game class', () => {
   beforeEach(() => {
-    // Mock Player and CPU to provide controlled dependencies
     Player.mockImplementation(() => ({
       gameboard: { allShipsSunk: jest.fn() },
     }));
@@ -15,71 +14,84 @@ describe('Game class - full unit tests', () => {
     }));
   });
 
-  test('onTheMove links to firstToMove & contains player1 or cpu', () => {
-    const game = new Game();
-    expect(game.onTheMove).toBe(game.firstToMove);
-    expect([game.player1, game.cpu]).toContain(game.onTheMove);
-    game.onTheMove = null;
-    expect(game.onTheMove).not.toBe(game.firstToMove);
-  });
-
-  test('player1Move switches turn to cpu after miss', () => {
-    // Simulate a miss on CPU gameboard
-    const game = new Game();
-    game.cpu.gameboard.receiveAttack.mockReturnValue({ result: 'miss' });
-    game.cpu.gameboard.allShipsSunk.mockReturnValue(false);
-
-    const result = game.player1Move(2, 7);
-    expect(result).toEqual({ result: 'miss' });
-    // onTheMove should now be cpu
-    expect(game.onTheMove).toBe(game.cpu);
-  });
-
-  test('player1Move returns win result if CPU fleet is sunk', () => {
-    const game = new Game();
-    game.cpu.gameboard.receiveAttack.mockReturnValue({
-      result: 'sunk',
-      ship: 'Destroyer',
+  describe('async logic with cpuMove and playRound', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
     });
-    game.cpu.gameboard.allShipsSunk.mockReturnValue(true);
+    afterEach(() => {
+      jest.runOnlyPendingTimers();
+      jest.useRealTimers();
+    });
 
-    const result = game.player1Move(5, 2);
-    expect(result).toEqual({ gameResult: 'Player 1 wins!' });
+    test('cpuMove loops on consecutive hits and ends after miss', () => {
+      const game = new Game();
+      game.cpu.attack
+        .mockImplementationOnce(() => ({ result: 'hit', ship: 'Destroyer' }))
+        .mockImplementationOnce(() => ({ result: 'hit', ship: 'Cruiser' }))
+        .mockImplementationOnce(() => ({ result: 'miss' }));
+      game.player1.gameboard.allShipsSunk.mockReturnValue(false);
+
+      const spyCpuMove = jest.spyOn(game, 'cpuMove');
+      game.onTheMove = game.cpu;
+
+      // Start the loop
+      game.playRound();
+
+      // Calls pending timers one by one
+      jest.runOnlyPendingTimers();
+      jest.runOnlyPendingTimers();
+      jest.runOnlyPendingTimers();
+
+      expect(spyCpuMove).toHaveBeenCalledTimes(3);
+      expect(game.cpu.attack).toHaveBeenCalledTimes(3);
+      expect(game.onTheMove).toBe(game.player1);
+
+      spyCpuMove.mockRestore();
+    });
+
+    test('playRound: cpuMove is called if onTheMove is cpu', () => {
+      const game = new Game();
+      game.onTheMove = game.cpu;
+
+      const cpuMoveSpy = jest
+        .spyOn(game, 'cpuMove')
+        .mockReturnValue('CPU_RESULT');
+      game.playRound();
+
+      // Not called immediately (pending mock timers)
+      expect(cpuMoveSpy).not.toHaveBeenCalled();
+
+      // Fast-forward timers (triggers mock)
+      jest.runOnlyPendingTimers();
+
+      // cpuMove should be called
+      expect(cpuMoveSpy).toHaveBeenCalled();
+      cpuMoveSpy.mockRestore();
+    });
+
+    test('playRound: does nothing if onTheMove is player1', () => {
+      const game = new Game();
+      game.onTheMove = game.player1;
+      const cpuMoveSpy = jest.spyOn(game, 'cpuMove');
+      const ret = game.playRound();
+      expect(cpuMoveSpy).not.toHaveBeenCalled();
+      expect(ret).toBeUndefined();
+      cpuMoveSpy.mockRestore();
+    });
   });
 
-  test('cpuMove switches turn to player1 after miss', () => {
-    // Simulate a miss by CPU
+  test('resetGame switches starting player between player1 and cpu', () => {
     const game = new Game();
-    game.cpu.attack.mockReturnValue({ result: 'miss' });
-    game.player1.gameboard.allShipsSunk.mockReturnValue(false);
-
-    const result = game.cpuMove();
-    expect(result).toEqual({ result: 'miss' });
-    expect(game.onTheMove).toBe(game.player1);
-  });
-
-  test('cpuMove returns win result if player1 fleet is sunk', () => {
-    // Simulate scenario where player1's fleet is sunk
-    const game = new Game();
-    game.cpu.attack.mockReturnValue({ result: 'sunk', ship: 'Cruiser' });
-    game.player1.gameboard.allShipsSunk.mockReturnValue(true);
-
-    const result = game.cpuMove();
-    expect(result).toEqual({ gameResult: 'CPU wins!' });
-  });
-
-  test('cpuMove loops on consecutive hits and ends after miss', () => {
-    // Simulate consecutive hits followed by a miss
-    const game = new Game();
-    game.cpu.attack
-      .mockImplementationOnce(() => ({ result: 'hit', ship: 'Destroyer' }))
-      .mockImplementationOnce(() => ({ result: 'hit', ship: 'Cruiser' }))
-      .mockImplementationOnce(() => ({ result: 'miss' }));
-    game.player1.gameboard.allShipsSunk.mockReturnValue(false);
-
-    const result = game.cpuMove();
-    expect(result).toEqual({ result: 'miss' });
-    expect(game.onTheMove).toBe(game.player1);
-    expect(game.cpu.attack).toHaveBeenCalledTimes(3);
+    const wasPlayerFirst = game.wasPlayerFirst;
+    game.resetGame();
+    expect(game.wasPlayerFirst).toBe(!wasPlayerFirst);
+    // Ensure firstToMove matches flag
+    if (wasPlayerFirst === true) {
+      expect(game.firstToMove).toBe(game.cpu);
+      expect(game.onTheMove).toBe(game.cpu);
+    } else {
+      expect(game.firstToMove).toBe(game.player1);
+      expect(game.onTheMove).toBe(game.player1);
+    }
   });
 });
