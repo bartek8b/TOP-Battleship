@@ -12,7 +12,7 @@ html {
 * {
   margin: 0;
   padding: 0;
-  & ::selection{
+  & ::selection {
     background-color: transparent;
   }
 }
@@ -84,3 +84,28 @@ a {
   font-family: system-ui, sans-serif;
   font-size: 0.8rem;
 }
+main {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+  'info info'
+  'plr cpu';
+  width: 100%;
+  place-items: center;
+}
+main > section {
+  border: 1px solid greenyellow;
+}
+section#info-container {
+  color: var(--main);
+  font-size: 2rem;
+  grid-area: info;
+}
+section#plr-container {
+  grid-area: plr;
+}
+section#cpu-container {
+  grid-area: cpu;
+}
+
