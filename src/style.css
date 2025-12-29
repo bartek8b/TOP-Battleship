@@ -89,11 +89,11 @@ a {
 }
 main {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr auto 1fr;
   grid-template-rows: auto;
   grid-template-areas:
-    'info info'
-    'plr cpu';
+    'info info info'
+    'plr fleet cpu';
   width: 100%;
   place-items: center;
   gap: calc(var(--gap-base) * 4);
@@ -109,7 +109,7 @@ section#info-container {
   color: var(--main);
   font-size: 2rem;
   grid-area: info;
-  height: fit-content;
+  min-height: calc(var(--gap-base) * 6);
 }
 section#plr-container {
   grid-area: plr;
@@ -126,8 +126,9 @@ div.board-container {
 }
 div.board-container > .cell {
   background-color: var(--main);
-  height: var(--cell-size);
-  width: var(--cell-size);
+  aspect-ratio: 1 / 1;
+  height: max(2.5vw, calc(var(--gap-base) * 4));
+  width: auto;
   border-radius: calc(var(--gap-base) / 2);
   opacity: 0.6;
 }
@@ -138,17 +139,20 @@ div.fleet-container {
   align-items: center;
   max-width: fit-content;
   gap: calc(var(--gap-base) * 2);
-  position: fixed;
-  left: calc(var(--gap-base));
-  bottom: calc(var(--gap-base));
+  min-width: 1.5rem;
+  grid-area: fleet;
 }
 div.fleet-container > .ship {
   display: flex;
-}
-svg {
-  height: calc(var(--gap-base) * 4);
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  height: calc(var(--gap-base) * 3);
+  width: auto;
   color: var(--font);
   fill: var(--font);
+}
+svg {
+  fill: inherit;
 }
 
 /* Click & hover effects only on CPU board */
@@ -167,8 +171,13 @@ section#cpu-container > div.board-container > .cell:active {
   main {
     grid-template-columns: 1fr;
     grid-template-areas:
-    'info'
-    'cpu'
-    'plr';
+      'info'
+      'cpu'
+      'fleet'
+      'plr';
+  }
+  div.fleet-container {
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 }
