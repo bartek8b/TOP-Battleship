@@ -22,10 +22,25 @@ html {
   --font: #d3d3d3;
 
   --gap-base: 0.5rem;
+  --cell-size: 40px;
 }
 body {
   -webkit-tap-highlight-color: transparent;
   text-wrap: pretty;
+  min-height: 100svh;
+  color: var(--font);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--gap-base) * 4);
+  color: var(--font);
+  padding: var(--gap-base);
+  font-family: 'text';
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: default;
+  position: relative;
   background-color: var(--bg);
   background-image:
     radial-gradient(
@@ -58,18 +73,6 @@ body {
       rgba(0, 255, 65, 0.3) 50%,
       transparent 50.5%
     );
-  min-height: 100svh;
-  color: var(--font);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--font);
-  padding: var(--gap-base);
-  font-family: 'text';
-  font-size: 1.5rem;
-  font-weight: bold;
-  cursor: default;
 }
 h1 {
   font-family: 'heading';
@@ -87,20 +90,26 @@ a {
 main {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto;
   grid-template-areas:
-  'info info'
-  'plr cpu';
+    'info info'
+    'plr cpu';
   width: 100%;
   place-items: center;
+  gap: calc(var(--gap-base) * 4);
 }
 main > section {
-  border: 1px solid greenyellow;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: calc(var(--gap-base) * 2);
+  text-align: center;
 }
 section#info-container {
   color: var(--main);
   font-size: 2rem;
   grid-area: info;
+  height: fit-content;
 }
 section#plr-container {
   grid-area: plr;
@@ -108,4 +117,58 @@ section#plr-container {
 section#cpu-container {
   grid-area: cpu;
 }
+div.board-container {
+  display: grid;
+  place-items: center;
+  grid-template-columns: repeat(10, auto);
+  grid-auto-rows: auto;
+  gap: calc(var(--gap-base) / 2);
+}
+div.board-container > .cell {
+  background-color: var(--main);
+  height: var(--cell-size);
+  width: var(--cell-size);
+  border-radius: calc(var(--gap-base) / 2);
+  opacity: 0.6;
+}
+div.fleet-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  max-width: fit-content;
+  gap: calc(var(--gap-base) * 2);
+  position: fixed;
+  left: calc(var(--gap-base));
+  bottom: calc(var(--gap-base));
+}
+div.fleet-container > .ship {
+  display: flex;
+}
+svg {
+  height: calc(var(--gap-base) * 4);
+  color: var(--font);
+  fill: var(--font);
+}
 
+/* Click & hover effects only on CPU board */
+section#cpu-container > div.board-container > .cell:active {
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  section#cpu-container > div.board-container > .cell:hover {
+    opacity: 1;
+    cursor: crosshair;
+  }
+}
+
+@media (max-width: 768px) {
+  main {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+    'info'
+    'cpu'
+    'plr';
+  }
+}
