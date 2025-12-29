@@ -1,3 +1,11 @@
+@font-face {
+  font-family: 'heading';
+  src: url(./fonts/wargames.regular.ttf);
+}
+@font-face {
+  font-family: 'text';
+  src: url(./fonts/bitgamefont.bit-game-font.ttf);
+}
 html {
   scroll-behavior: smooth;
 }
@@ -53,10 +61,22 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
+  color: var(--font);
+  padding: var(--gap-base);
+  font-family: 'text';
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+h1 {
+  font-family: 'heading';
+  font-weight: lighter;
+  font-size: 2.8rem;
+  color: var(--main);
 }
 a {
   align-self: flex-end;
   text-decoration: none;
   color: inherit;
-  margin-right: var(--gap-base);
+  font-family: system-ui, sans-serif;
+  font-size: 0.8rem;
 }
