@@ -3,8 +3,9 @@ import { Ship } from './ship.js';
 import { getRandomIntBetween } from './utils.js';
 
 export class Player {
-  constructor() {
+  constructor(name = 'Player 1') {
     this.gameboard = new Gameboard();
+    this.name = name;
   }
 
   randomShipsPlacement() {
@@ -29,7 +30,7 @@ export class Player {
 
 export class CPU extends Player {
   constructor() {
-    super();
+    super('CPU');
     // 'random' if prev shot inaccurate or 'target' if opposite
     this.mode = 'random';
 
