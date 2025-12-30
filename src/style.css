@@ -154,12 +154,19 @@ div.fleet-container > .ship {
 svg {
   fill: inherit;
 }
-.hit{
-  background-color: red;
+.cell.hit {
+  background: #ff3030 !important;
+} 
+.cell.miss {
+  opacity: .2 !important;
+} 
+.cell.ship {
+  background: #c5c5e5 !important;
 }
-.miss{
-  background-color: transparent;
+.cell.inactive {
+  cursor: default !important;
 }
+
 
 /* Click & hover effects only on CPU board */
 section#cpu-container > div.board-container > .cell:active {
