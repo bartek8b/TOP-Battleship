@@ -34,8 +34,10 @@ function updateGrid(player) {
 
     if (arr[x][y] === 'miss') {
       cell.classList.add('miss');
+      cell.classList.add('inactive');
     } else if (arr[x][y] === 'hit') {
       cell.classList.add('hit');
+      cell.classList.add('inactive');
     } else if (arr[x][y] instanceof Ship && player.name === 'Player 1') {
       // Show player 1's own ships on board
       cell.classList.add('ship');
