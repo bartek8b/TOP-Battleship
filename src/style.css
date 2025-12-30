@@ -161,9 +161,11 @@ section#cpu-container > div.board-container > .cell:active {
 }
 
 @media (hover: hover) {
+  section#cpu-container > div.board-container {
+    cursor: crosshair;
+  }
   section#cpu-container > div.board-container > .cell:hover {
     opacity: 1;
-    cursor: crosshair;
   }
 }
 
