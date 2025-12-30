@@ -18,7 +18,7 @@ export class MessageBoard {
   }
 
   sunk(player, ship) {
-    return `${player.name} sunk the opponents ${ship.name}!`;
+    return `${player.name} sunk the opponents ${ship.type}!`;
   }
 
   allSunk(player) {
