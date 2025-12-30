@@ -154,6 +154,12 @@ div.fleet-container > .ship {
 svg {
   fill: inherit;
 }
+.hit{
+  background-color: red;
+}
+.miss{
+  background-color: transparent;
+}
 
 /* Click & hover effects only on CPU board */
 section#cpu-container > div.board-container > .cell:active {
@@ -161,11 +167,9 @@ section#cpu-container > div.board-container > .cell:active {
 }
 
 @media (hover: hover) {
-  section#cpu-container > div.board-container {
-    cursor: crosshair;
-  }
   section#cpu-container > div.board-container > .cell:hover {
     opacity: 1;
+    cursor: crosshair;
   }
 }
 
@@ -181,5 +185,6 @@ section#cpu-container > div.board-container > .cell:active {
   div.fleet-container {
     flex-direction: row;
     flex-wrap: wrap;
+    margin-inline: 10%;
   }
 }

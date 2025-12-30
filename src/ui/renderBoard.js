@@ -1,4 +1,4 @@
-export { resetGrid };
+import { Ship } from '../engine/ship';
 
 function resetGrid(player) {
   // Get board container for specified player
@@ -16,3 +16,7 @@ function resetGrid(player) {
     }
   }
 }
+
+function updateGrid(player) {}
+
+export { resetGrid, updateGrid };
