@@ -131,6 +131,15 @@ div.board-container > .cell {
   width: auto;
   border-radius: calc(var(--gap-base) / 2);
   opacity: 0.6;
+  & svg {
+    fill: var(--font);
+  }
+  &.hit {
+    opacity: .9;
+  }
+  &.ship {
+    opacity: .9;
+  }
 }
 div.fleet-container {
   display: flex;
@@ -155,18 +164,19 @@ svg {
   fill: inherit;
 }
 .cell.hit {
-  background: #ff3030 !important;
-} 
+  background: transparent !important;
+  border: 3px solid #ffa500;
+}
 .cell.miss {
-  opacity: .2 !important;
-} 
+  opacity: 0.2 !important;
+}
 .cell.ship {
-  background: #c5c5e5 !important;
+  background: transparent !important;
+  border: 3px solid var(--main);
 }
 .cell.inactive {
   cursor: default !important;
 }
-
 
 /* Click & hover effects only on CPU board */
 section#cpu-container > div.board-container > .cell:active {
@@ -177,7 +187,7 @@ section#cpu-container > div.board-container > .cell:active {
   section#cpu-container > div.board-container:hover {
     cursor: crosshair;
   }
-  section#cpu-container > div.board-container > .cell:hover {
+  section#cpu-container > div.board-container > .cell:not(.hit):hover {
     opacity: 1;
   }
 }
