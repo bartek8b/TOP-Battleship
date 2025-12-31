@@ -164,15 +164,15 @@ svg {
   fill: inherit;
 }
 .cell.hit {
-  background: transparent !important;
-  border: 3px solid #ffa500;
+  background-color: var(--bg) !important;
+  border: 2px solid tomato;
 }
 .cell.miss {
-  opacity: 0.2 !important;
+  opacity: 0.3 !important;
 }
 .cell.ship {
-  background: transparent !important;
-  border: 3px solid var(--main);
+  background-color: var(--bg) !important;
+  border: 2px solid var(--main);
 }
 .cell.inactive {
   cursor: default !important;
