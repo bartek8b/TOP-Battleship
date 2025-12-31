@@ -86,10 +86,12 @@ export class CPU extends Player {
     if (shot instanceof Ship && shot.isSunk()) {
       this.removeAdjacentToSunkShip(shot, enemyBoard);
     }
+    return shot;
   }
 
   // Helper for inteligent attack when ship hit
   targetAttack(enemyBoard) {
+    let shot = null;
     // In case we're not in target mode, fallback to random
     if (this.mode === 'random') return this.randomAttack(enemyBoard);
 
@@ -141,7 +143,7 @@ export class CPU extends Player {
       if (this.candidateMoves.length > 0) {
         const idx = getRandomIntBetween(0, this.candidateMoves.length - 1);
         const [attackRow, attackCol] = this.candidateMoves.splice(idx, 1)[0];
-        const shot = enemyBoard.receiveAttack(attackRow, attackCol);
+        shot = enemyBoard.receiveAttack(attackRow, attackCol);
 
         // If ship is hit but not sunk build movesStreak,
         // If sunk delete adjacent moves from possibleMoves & clear movesStreak & go to 'random' mode
@@ -157,7 +159,7 @@ export class CPU extends Player {
         // Fallback if no candidateMoves
         this.mode = 'random';
         this.movesStreak = [];
-        this.randomAttack(enemyBoard);
+        return this.randomAttack(enemyBoard);
       }
     }
 
@@ -200,7 +202,7 @@ export class CPU extends Player {
         // Randomly select one of the candidate moves and perform an attack
         const idx = getRandomIntBetween(0, this.candidateMoves.length - 1);
         const [attackRow, attackCol] = this.candidateMoves.splice(idx, 1)[0];
-        const shot = enemyBoard.receiveAttack(attackRow, attackCol);
+        shot = enemyBoard.receiveAttack(attackRow, attackCol);
 
         // If a ship is hit and not sunk, add the position to the moves streak
         if (shot instanceof Ship && !shot.isSunk()) {
@@ -216,9 +218,10 @@ export class CPU extends Player {
         // If there are no candidate moves, revert to random mode and reset moves streak
         this.mode = 'random';
         this.movesStreak = [];
-        this.randomAttack(enemyBoard);
+        return this.randomAttack(enemyBoard);
       }
     }
+    return shot || this.randomAttack(enemyBoard);
   }
 
   // Main attack method

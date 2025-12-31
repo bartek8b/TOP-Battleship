@@ -19,7 +19,6 @@ function resetGrid(player) {
 
 function updateGrid(player) {
   const arr = player.gameboard.grid;
-  console.log(arr);
   const containerId =
     player.name === 'Player 1' ? 'plr-container' : 'cpu-container';
   const cells = document.querySelectorAll(

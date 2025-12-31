@@ -1,6 +1,6 @@
 import { Game } from '../engine/gameplay';
 import { resetGrid, updateGrid } from './renderBoard';
-import { setListeners } from './eventListeners';
+import { setListeners, cpuSeries } from './eventListeners';
 
 export function init() {
   const game = new Game();
@@ -19,9 +19,6 @@ export function init() {
   setListeners(game);
 
   if (game.onTheMove === game.cpu) {
-    if (game.onTheMove === game.cpu) {
-      game.playRound();
-      setTimeout(() => updateGrid(game.player1), 550); // After cpuMove
-    }
+    cpuSeries(game);
   }
 }
