@@ -37,11 +37,6 @@ export class Game {
     }
   }
 
-  playRound() {
-    if (this.onTheMove === this.cpu)
-      return setTimeout(() => this.cpuMove(), 500);
-  }
-
   resetGame() {
     this.player1 = new Player();
     this.cpu = new CPU();
