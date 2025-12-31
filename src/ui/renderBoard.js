@@ -36,13 +36,18 @@ function updateGrid(player) {
       cell.classList.add('miss');
       cell.classList.add('inactive');
     } else if (arr[x][y] === 'hit') {
+      // Add ship sunk svg
       cell.classList.add('hit');
       cell.classList.add('inactive');
     } else if (arr[x][y] instanceof Ship && player.name === 'Player 1') {
       // Show player 1's own ships on board
+      // Add ship svg
       cell.classList.add('ship');
     }
   });
 }
+
+const shipSvg = ``;
+const sunkShipSvg = ``;
 
 export { resetGrid, updateGrid };
