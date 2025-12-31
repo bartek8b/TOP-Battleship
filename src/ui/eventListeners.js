@@ -24,11 +24,8 @@ export function setListeners(game) {
     updateGrid(game.cpu);
 
     if (game.onTheMove === game.cpu) {
-      setTimeout(() => {
-        game.cpuMove();
-        updateGrid(game.player1);
-        // Sprawdzić czy koniec gry
-      }, 500);
+      game.playRound();
+      setTimeout(() => updateGrid(game.player1), 550); // After cpuMove
     }
   });
 }

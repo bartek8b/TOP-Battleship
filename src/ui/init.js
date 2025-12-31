@@ -17,10 +17,11 @@ export function init() {
 
   // In the end
   setListeners(game);
+
   if (game.onTheMove === game.cpu) {
-    setTimeout(() => {
-      game.cpuMove();
-      updateGrid(game.player1);
-    }, 500);
+    if (game.onTheMove === game.cpu) {
+      game.playRound();
+      setTimeout(() => updateGrid(game.player1), 550); // After cpuMove
+    }
   }
 }
