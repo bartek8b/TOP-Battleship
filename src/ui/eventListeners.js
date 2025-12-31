@@ -1,4 +1,4 @@
-import { updateGrid } from "./renderBoard";
+import { updateGrid } from './renderBoard';
 
 export function setListeners(game) {
   const grid = document.querySelector(`#cpu-container .board-container`);
@@ -10,7 +10,12 @@ export function setListeners(game) {
     const x = Number(cell.dataset.x);
     const y = Number(cell.dataset.y);
 
-    game.player1Move(x, y);
-    updateGrid(game.cpu)
+    try {
+      game.player1Move(x, y);
+    } catch {
+      // Double hit causes error in engine
+    }
+
+    updateGrid(game.cpu);
   });
 }
