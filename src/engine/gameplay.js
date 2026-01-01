@@ -67,7 +67,7 @@ export class Game {
       if (typeof onIteration === 'function') {
         try {
           onIteration(shot);
-        } catch (e) {
+        } catch {
           // swallow UI callback errors to not break game loop
           /* noop */
         }
