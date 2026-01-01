@@ -18,17 +18,17 @@ describe('Player', () => {
     }
 
     // Divide by length: each ship occupies `length` segments, so total segments / length = number of ships
-    expect(shipCounts[4] / 4).toEqual(1); 
-    expect(shipCounts[3] / 3).toEqual(2); 
-    expect(shipCounts[2] / 2).toEqual(3); 
-    expect(shipCounts[1] / 1).toEqual(4); 
+    expect(shipCounts[4] / 4).toEqual(1);
+    expect(shipCounts[3] / 3).toEqual(2);
+    expect(shipCounts[2] / 2).toEqual(3);
+    expect(shipCounts[1] / 1).toEqual(4);
   });
 
   test('randomAttack selects and removes move', () => {
     const cpu = new CPU();
-    cpu.possibleMoves = [[5, 5]]; // Only one cell
-    // Mock
-    const enemyBoard = { receiveAttack: jest.fn() };
+    cpu.possibleMoves = [[5, 5]];
+    // Mock returning a miss result (reflects realistic API)
+    const enemyBoard = { receiveAttack: jest.fn(() => ({ result: 'miss' })) };
 
     cpu.randomAttack(enemyBoard);
 
