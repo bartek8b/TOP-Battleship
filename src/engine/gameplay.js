@@ -22,8 +22,7 @@ export class Game {
     const shot = this.cpu.attack(this.player1.gameboard);
     if (this.player1.gameboard.allShipsSunk())
       return { gameResult: 'CPU wins!' };
-
-    if (shot?.ship) {
+    if (shot?.result === 'hit' || shot?.result === 'sunk') {
       this.onTheMove = this.cpu;
       return shot;
     } else {
@@ -37,10 +36,12 @@ export class Game {
     const shot = this.cpu.gameboard.receiveAttack(row, col);
     if (this.cpu.gameboard.allShipsSunk())
       return { gameResult: 'Player 1 wins!' };
-    if (shot?.ship) {
+    if (shot?.result === 'hit' || shot?.result === 'sunk') {
+      // player hit -> keep player's turn
       this.onTheMove = this.player1;
       return shot;
     } else {
+      // miss -> CPU starts
       this.onTheMove = this.cpu;
       return shot;
     }

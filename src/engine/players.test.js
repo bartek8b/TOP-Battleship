@@ -18,10 +18,10 @@ describe('Player', () => {
     }
 
     // Divide by length: each ship occupies `length` segments, so total segments / length = number of ships
-    expect(shipCounts[4] / 4).toEqual(1); // battleship
-    expect(shipCounts[3] / 3).toEqual(2); // cruisers
-    expect(shipCounts[2] / 2).toEqual(3); // destroyers
-    expect(shipCounts[1] / 1).toEqual(4); // submarines
+    expect(shipCounts[4] / 4).toEqual(1); 
+    expect(shipCounts[3] / 3).toEqual(2); 
+    expect(shipCounts[2] / 2).toEqual(3); 
+    expect(shipCounts[1] / 1).toEqual(4); 
   });
 
   test('randomAttack selects and removes move', () => {
@@ -42,7 +42,9 @@ describe('Player', () => {
     const mockShip = new Ship(2);
     // Change return value of mockShip.isSunk()
     jest.spyOn(mockShip, 'isSunk').mockReturnValue(false);
-    const enemyBoard = { receiveAttack: jest.fn(() => mockShip) };
+    const enemyBoard = {
+      receiveAttack: jest.fn(() => ({ result: 'hit', ship: mockShip })),
+    };
 
     cpu.randomAttack(enemyBoard);
 
@@ -52,7 +54,7 @@ describe('Player', () => {
   test('randomAttack does not switch to target if miss', () => {
     const cpu = new CPU();
     cpu.possibleMoves = [[1, 2]];
-    const enemyBoard = { receiveAttack: jest.fn(() => null) };
+    const enemyBoard = { receiveAttack: jest.fn(() => ({ result: 'miss' })) };
 
     cpu.randomAttack(enemyBoard);
 
@@ -63,7 +65,14 @@ describe('Player', () => {
     const cpu = new CPU();
     cpu.possibleMoves = [[3, 3]];
     const mockShip = { isSunk: () => true };
-    const enemyBoard = { receiveAttack: jest.fn(() => mockShip) };
+
+    const enemyBoard = {
+      receiveAttack: jest.fn(() => ({ result: 'sunk', ship: mockShip })),
+      // Provide a grid so removeAdjacentToSunkShip can operate without throwing
+      grid: Array.from({ length: 10 }, () => Array(10).fill(null)),
+    };
+    // Place mockShip at the attacked coordinates so removeAdjacentToSunkShip finds it
+    enemyBoard.grid[3][3] = mockShip;
 
     cpu.randomAttack(enemyBoard);
 
@@ -116,7 +125,7 @@ describe('Player', () => {
 
   test('CPU attack visits only available moves and never repeats', () => {
     const cpu = new CPU();
-    const enemyBoard = { receiveAttack: jest.fn(() => null) };
+    const enemyBoard = { receiveAttack: jest.fn(() => ({ result: 'miss' })) };
     const allMoves = [];
     for (let r = 0; r < 10; r++)
       for (let c = 0; c < 10; c++) allMoves.push([r, c]);
@@ -148,7 +157,7 @@ describe('Player', () => {
       [7, 7],
     ];
     const enemyBoard = {
-      receiveAttack: jest.fn(() => null),
+      receiveAttack: jest.fn(() => ({ result: 'miss' })),
     };
 
     cpu.targetAttack(enemyBoard);
@@ -180,7 +189,7 @@ describe('Player', () => {
 
     //Mock enemyBoard
     const enemyBoard = {
-      receiveAttack: jest.fn(() => mockShip),
+      receiveAttack: jest.fn(() => ({ result: 'sunk', ship: mockShip })),
       grid: Array.from({ length: 10 }, () => Array(10).fill(null)),
     };
     enemyBoard.grid[3][2] = mockShip;
@@ -203,7 +212,7 @@ describe('Player', () => {
     cpu.candidateMoves = [];
     cpu.possibleMoves = [[5, 5]];
     const enemyBoard = {
-      receiveAttack: jest.fn(() => null),
+      receiveAttack: jest.fn(() => ({ result: 'miss' })),
     };
     const spyRandomAttack = jest.spyOn(cpu, 'randomAttack');
     cpu.targetAttack(enemyBoard);

@@ -49,6 +49,7 @@ export class CPU extends Player {
 
   // Helper to remove all adjacent cells of sunk ship
   removeAdjacentToSunkShip(ship, enemyBoard) {
+    if (!ship) return;
     for (let r = 0; r < 10; r++) {
       for (let c = 0; c < 10; c++) {
         if (enemyBoard.grid[r][c] === ship) {
@@ -79,12 +80,12 @@ export class CPU extends Player {
     const [row, col] = this.possibleMoves.splice(idx, 1)[0];
     const shot = enemyBoard.receiveAttack(row, col);
     // Switch to target mode only if ship is hit but hasn't sunk yet
-    if (shot instanceof Ship && !shot.isSunk()) {
+    if (shot?.result === 'hit') {
       this.mode = 'target';
       this.movesStreak.push([row, col]);
     }
-    if (shot instanceof Ship && shot.isSunk()) {
-      this.removeAdjacentToSunkShip(shot, enemyBoard);
+    if (shot?.result === 'sunk') {
+      this.removeAdjacentToSunkShip(shot.ship, enemyBoard);
     }
     return shot;
   }
@@ -96,6 +97,7 @@ export class CPU extends Player {
     if (this.mode === 'random') return this.randomAttack(enemyBoard);
 
     if (this.movesStreak.length === 1) {
+      this.candidateMoves = [];
       const [row, col] = this.movesStreak[0];
 
       // Remove diagonal neighbor positions from possibleMoves, as ships can't have segments there
@@ -145,13 +147,11 @@ export class CPU extends Player {
         const [attackRow, attackCol] = this.candidateMoves.splice(idx, 1)[0];
         shot = enemyBoard.receiveAttack(attackRow, attackCol);
 
-        // If ship is hit but not sunk build movesStreak,
-        // If sunk delete adjacent moves from possibleMoves & clear movesStreak & go to 'random' mode
-        if (shot instanceof Ship && !shot.isSunk()) {
+        if (shot?.result === 'hit') {
           this.movesStreak.push([attackRow, attackCol]);
         }
-        if (shot instanceof Ship && shot.isSunk()) {
-          this.removeAdjacentToSunkShip(shot, enemyBoard);
+        if (shot?.result === 'sunk') {
+          this.removeAdjacentToSunkShip(shot.ship, enemyBoard);
           this.movesStreak = [];
           this.mode = 'random';
         }
@@ -205,12 +205,12 @@ export class CPU extends Player {
         shot = enemyBoard.receiveAttack(attackRow, attackCol);
 
         // If a ship is hit and not sunk, add the position to the moves streak
-        if (shot instanceof Ship && !shot.isSunk()) {
+        if (shot?.result === 'hit') {
           this.movesStreak.push([attackRow, attackCol]);
         }
         // If a ship is sunk, remove all adjacent possible moves and reset streak and mode
-        if (shot instanceof Ship && shot.isSunk()) {
-          this.removeAdjacentToSunkShip(shot, enemyBoard);
+        if (shot?.result === 'sunk') {
+          this.removeAdjacentToSunkShip(shot.ship, enemyBoard);
           this.movesStreak = [];
           this.mode = 'random';
         }
@@ -226,10 +226,7 @@ export class CPU extends Player {
 
   // Main attack method
   attack(enemyBoard) {
-    if (this.mode === 'random') {
-      return this.randomAttack(enemyBoard);
-    } else {
-      return this.targetAttack(enemyBoard);
-    }
+    if (this.mode === 'random') return this.randomAttack(enemyBoard);
+    else return this.targetAttack(enemyBoard);
   }
 }
