@@ -1,7 +1,5 @@
 import { updateGrid } from './renderBoard';
 
-let cpuSeriesLock = false; // global for this module
-
 export function setListeners(game) {
   const grid = document.querySelector(`#cpu-container .board-container`);
 
@@ -9,6 +7,7 @@ export function setListeners(game) {
     const cell = e.target.closest('.cell');
     if (!cell) return;
 
+    // Only allow clicks if player1 is on the move
     if (game.onTheMove !== game.player1) return;
 
     const x = Number(cell.dataset.x);
@@ -24,37 +23,14 @@ export function setListeners(game) {
       return;
     }
 
+    // Update CPU board after player's shot
     updateGrid(game.cpu);
-    if (
-      !cpuSeriesLock &&
-      prevMove === game.player1 &&
-      game.onTheMove === game.cpu
-    ) {
-      cpuSeriesLock = true;
-      cpuSeries(game);
+
+    // If player's shot produced a miss and control passed to CPU, start engine loop.
+    // game.startCpuLoop internally prevents multiple concurrent loops.
+    if (prevMove === game.player1 && game.onTheMove === game.cpu) {
+      // Provide callback to update player grid after each cpuMove
+      game.startCpuLoop(500, () => updateGrid(game.player1));
     }
   });
-}
-
-export function cpuSeries(game) {
-  cpuSeriesLock = true;
-  function loop() {
-    console.log('cpuSeries START, onTheMove:', game.onTheMove.name);
-
-    if (game.onTheMove !== game.cpu) {
-      cpuSeriesLock = false;
-      console.log('cpuSeries END, control to', game.onTheMove.name);
-      return;
-    }
-    game.cpuMove();
-    updateGrid(game.player1);
-
-    if (game.onTheMove === game.cpu) {
-      setTimeout(loop, 500);
-    } else {
-      cpuSeriesLock = false;
-      console.log('cpuSeries END, control to', game.onTheMove.name);
-    }
-  }
-  loop();
 }

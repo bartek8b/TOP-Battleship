@@ -1,6 +1,6 @@
 import { Game } from '../engine/gameplay';
 import { resetGrid, updateGrid } from './renderBoard';
-import { setListeners, cpuSeries } from './eventListeners';
+import { setListeners } from './eventListeners';
 
 export function init() {
   const game = new Game();
@@ -18,7 +18,8 @@ export function init() {
   // In the end
   setListeners(game);
 
+  // If CPU starts, start loop in engine and pass callback to update player view
   if (game.onTheMove === game.cpu) {
-    cpuSeries(game);
+    game.startCpuLoop(500, () => updateGrid(game.player1));
   }
 }
