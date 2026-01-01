@@ -18,8 +18,10 @@ export class Game {
     const shot = this.cpu.attack(this.player1.gameboard);
     if (this.player1.gameboard.allShipsSunk())
       return { gameResult: 'CPU wins!' };
-    if (shot?.ship) return this.playRound();
-    else {
+    if (shot?.ship) {
+      this.onTheMove = this.cpu;
+      return shot;
+    } else {
       this.onTheMove = this.player1;
       return shot;
     }
@@ -35,11 +37,6 @@ export class Game {
       this.onTheMove = this.cpu;
       return shot;
     }
-  }
-
-  playRound() {
-    if (this.onTheMove === this.cpu)
-      return setTimeout(() => this.cpuMove(), 500);
   }
 
   resetGame() {
