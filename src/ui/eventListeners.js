@@ -1,10 +1,16 @@
 import { updateGrid } from './renderBoard';
 
+// setListeners(game, messageBoard) - attach delegated click listener for CPU board clicks.
+// Uses event delegation on document so it survives DOM rebuilds of the board.
+// Calling setListeners multiple times is safe (it will attach the handler once).
 export function setListeners(game, messageBoard) {
-  const grid = document.querySelector(`#cpu-container .board-container`);
+  // Guard: attach only once globally
+  if (document._cpuCellClickListenerAttached) return;
+  document._cpuCellClickListenerAttached = true;
 
-  grid.addEventListener('click', (e) => {
-    const cell = e.target.closest('.cell');
+  document.addEventListener('click', (e) => {
+    // Find if the click was inside a CPU board cell
+    const cell = e.target.closest('#cpu-container .board-container .cell');
     if (!cell) return;
 
     // Only allow clicks if player1 is on the move
@@ -14,6 +20,7 @@ export function setListeners(game, messageBoard) {
     const y = Number(cell.dataset.y);
 
     const arr = game.cpu.gameboard.grid;
+    // Ignore clicks on already tried cells
     if (arr[x][y] === 'hit' || arr[x][y] === 'miss') return;
 
     const prevMove = game.onTheMove;
@@ -37,13 +44,10 @@ export function setListeners(game, messageBoard) {
     }
 
     // If player's shot produced a miss and control passed to CPU, start engine loop.
-    // game.startCpuLoop internally prevents multiple concurrent loops.
     if (prevMove === game.player1 && game.onTheMove === game.cpu) {
       // Provide callback to update player grid after each cpuMove and show messages
       game.startCpuLoop(500, (cpuShot) => {
-        // cpuShot may be undefined (skipped) — ignore
         if (!cpuShot) return;
-
         if (cpuShot.result === 'miss') {
           messageBoard.miss(game.cpu);
         } else if (cpuShot.result === 'hit') {

@@ -11,57 +11,76 @@ export function init() {
   resetGrid(game.player1);
 
   // Create MessageBoard with explicit container (safer than lazy-get)
-  const messageBoard = new MessageBoard(document.getElementById('info-container'));
+  const messageBoard = new MessageBoard(
+    document.getElementById('info-container'),
+  );
   messageBoard.welcome();
+  // Show placeShips prompt (includes "Random" button)
+  setTimeout(() => messageBoard.placeShips(), 800);
 
   // Place ships randomly (temporary)
   game.cpu.randomShipsPlacement();
   updateGrid(game.cpu);
 
-  game.player1.randomShipsPlacement();
-  updateGrid(game.player1);
+  let listenersAttached = false;
 
-  // Set up listeners, passing messageBoard so clicks can show messages
-  setListeners(game, messageBoard);
+  function attachGameListenersAfterPlayerPlaced() {
+    if (!listenersAttached) {
+      setListeners(game, messageBoard);
+      listenersAttached = true;
+    }
+  }
 
-  // Listen for action buttons inside message area (place-ships / rematch)
   document.addEventListener('click', (e) => {
     const id = e.target?.id;
     if (id === 'place-ships-btn') {
-      // Randomize player's ships and update
-      // If you later implement a reset method on player/gameboard, use it; for now, place randomly
-      // Clear player's board first: resetGrid + re-place ships
+      // Clear player's grid and populate using the same player instance
       resetGrid(game.player1);
-      game.player1 = new (game.player1.constructor)(); // create new Player instance preserving constructor usage
+      // Reset existing player's gameboard instead of replacing the player object
+      if (typeof game.player1.gameboard?.reset === 'function') {
+        game.player1.gameboard.reset();
+      }
       game.player1.randomShipsPlacement();
       updateGrid(game.player1);
-      messageBoard.show('Player ships randomized', 1200);
+
+      // Attach board-click listeners (only after player placed)
+      attachGameListenersAfterPlayerPlaced();
+
+      // Announce who starts and possibly start CPU loop
+      const starter = game.onTheMove;
+      messageBoard.show(`${starter.name} starts!`, 1400);
+
+      // If CPU starts, begin cpu loop (it will only run if game.onTheMove === cpu)
+      if (game.onTheMove === game.cpu) {
+        game.startCpuLoop(500, (cpuShot) => {
+          if (!cpuShot) return;
+          if (cpuShot.result === 'miss') {
+            messageBoard.miss(game.cpu);
+          } else if (cpuShot.result === 'hit') {
+            messageBoard.accurate(game.cpu);
+          } else if (cpuShot.result === 'sunk') {
+            messageBoard.sunk(game.cpu, cpuShot.ship);
+          }
+          updateGrid(game.player1);
+        });
+      }
     }
+
     if (id === 'rematch-btn') {
-      // Reset game and grids, re-place ships randomly
+      // Reset engine state, re-render grids. CPU gets ships immediately, player must click Random again.
       game.resetGame();
+
       resetGrid(game.cpu);
       resetGrid(game.player1);
+
+      // CPU places ships immediately for the new match
       game.cpu.randomShipsPlacement();
-      game.player1.randomShipsPlacement();
       updateGrid(game.cpu);
-      updateGrid(game.player1);
-      messageBoard.show('Rematch started', 1200);
+
+      // Do NOT place player's ships automatically
+      listenersAttached = false; // require player to click Random again
+      // Show placeShips prompt again
+      messageBoard.placeShips();
     }
   });
-
-  // If CPU starts, start loop in engine and pass callback to update player view
-  if (game.onTheMove === game.cpu) {
-    game.startCpuLoop(500, (cpuShot) => {
-      if (!cpuShot) return;
-      if (cpuShot.result === 'miss') {
-        messageBoard.miss(game.cpu);
-      } else if (cpuShot.result === 'hit') {
-        messageBoard.accurate(game.cpu);
-      } else if (cpuShot.result === 'sunk') {
-        messageBoard.sunk(game.cpu, cpuShot.ship);
-      }
-      updateGrid(game.player1);
-    });
-  }
 }
