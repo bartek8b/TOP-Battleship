@@ -111,6 +111,10 @@ section#info-container {
   grid-area: info;
   min-height: calc(var(--gap-base) * 6);
 }
+section#cpu-container > div.board-container > .cell:not(.hit):active {
+  opacity: 1;
+  background: linear-gradient(var(--main), tomato);
+}
 section#plr-container {
   grid-area: plr;
 }
@@ -135,10 +139,10 @@ div.board-container > .cell {
     fill: var(--font);
   }
   &.hit {
-    opacity: .9;
+    opacity: 0.9;
   }
   &.ship {
-    opacity: .9;
+    opacity: 0.9;
   }
 }
 div.fleet-container {
