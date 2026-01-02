@@ -19,19 +19,43 @@ export class Game {
 
   // Automated CPU attack
   cpuMove() {
-    const shot = this.cpu.attack(this.player1.gameboard);
-    if (this.player1.gameboard.allShipsSunk())
+    // If player's fleet is already sunk, return immediate game result (avoid calling cpu.attack)
+    if (this.player1.gameboard.allShipsSunk()) {
+      // ensure CPU loop will stop
       return { gameResult: 'CPU wins!' };
+    }
 
+    // Perform one CPU attack (may throw) — protect with try/catch
+    let shot;
+    try {
+      shot = this.cpu.attack(this.player1.gameboard);
+    } catch (e) {
+      // Stop cpu loop on unexpected engine error and return error object
+      this._cpuLoopRunning = false;
+      if (this._cpuLoopTimer) {
+        clearTimeout(this._cpuLoopTimer);
+        this._cpuLoopTimer = null;
+      }
+      // Optionally set turn back to player to avoid CPU stuck
+      this.onTheMove = this.player1;
+      return { error: e?.message || String(e) };
+    }
+
+    // If attack finished the player's fleet, return game result
+    if (this.player1.gameboard.allShipsSunk()) {
+      return { gameResult: 'CPU wins!' };
+    }
+
+    // Normal flow: set onTheMove according to shot result
     if (shot?.result === 'hit' || shot?.result === 'sunk') {
       this.onTheMove = this.cpu;
       return shot;
-    }
-    if (shot?.result === 'miss') {
+    } else if (shot?.result === 'miss') {
       this.onTheMove = this.player1;
       return shot;
     }
-    // shot is undefined — do not change onTheMove; allow CPU loop to schedule next attempt
+
+    // shot could be undefined (skipped) — do not change onTheMove
     return shot;
   }
 
@@ -76,6 +100,16 @@ export class Game {
           // swallow UI callback errors to not break game loop
           /* noop */
         }
+      }
+
+      // If game result or error occurred, stop the loop
+      if (shot?.gameResult || shot?.error) {
+        this._cpuLoopRunning = false;
+        if (this._cpuLoopTimer) {
+          clearTimeout(this._cpuLoopTimer);
+          this._cpuLoopTimer = null;
+        }
+        return;
       }
 
       // If still CPU turn (i.e. hit), schedule next iteration
