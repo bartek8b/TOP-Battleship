@@ -36,6 +36,11 @@ export class MessageBoard {
     container.innerHTML = html;
     container.classList.add('visible');
 
+    // Block clicks globally while message is visible
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.add('blocked');
+    }
+
     if (typeof duration === 'number' && duration > 0) {
       this._hideTimer = setTimeout(() => {
         this.hide();
@@ -50,6 +55,11 @@ export class MessageBoard {
 
     this._clearTimers();
     container.classList.remove('visible');
+
+    // Remove global click block
+    if (typeof document !== 'undefined' && document.body) {
+      document.body.classList.remove('blocked');
+    }
   }
 
   // Show after configured delay (useful to allow hide animation before showing next message)
@@ -61,43 +71,40 @@ export class MessageBoard {
     );
   }
 
+  // Public convenience methods
   welcome() {
     this.hide();
-    setTimeout(this.show('Battleship 1.0.0 by 8b'), 600);
+    this._delayedShow('Battleship 1.0.0 by 8b', 2000);
   }
 
   placeShips() {
     this.hide();
-    setTimeout(
-      this.show(`Place your ships on the board or use ${placeShipsBtn}`),
-      600,
+    this._delayedShow(
+      `Place your ships on the board or use ${placeShipsBtn}`,
+      3000,
     );
   }
+
   miss(player) {
     this.hide();
-    setTimeout(this.show(`${player.name} missed!`), 600);
+    this._delayedShow(`${player.name} missed!`, 1500);
   }
 
   accurate(player) {
     this.hide();
-    setTimeout(this.show(`${player.name} hit the opponents ship!`), 600);
+    this._delayedShow(`${player.name} hit the opponent's ship!`, 1500);
   }
 
   sunk(player, ship) {
     this.hide();
-    setTimeout(
-      this.show(`${player.name} sunk the opponents ${ship.type}!`),
-      600,
-    );
+    this._delayedShow(`${player.name} sunk the opponent's ${ship.type}!`, 2200);
   }
 
   allSunk(player) {
     this.hide();
-    setTimeout(
-      this.show(
-        `${player.name} sunk the entire opponents fleet! ${rematchBtn}`,
-      ),
-      600,
+    this._delayedShow(
+      `${player.name} sunk the entire opponent's fleet! ${rematchBtn}`,
+      3500,
     );
   }
 }
