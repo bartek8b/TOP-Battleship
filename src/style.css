@@ -110,6 +110,30 @@ section#info-container {
   font-size: 2rem;
   grid-area: info;
   min-height: calc(var(--gap-base) * 6);
+  display: flex;
+  flex-direction: row;
+  transition:
+    transform 600ms ease,
+    opacity 600ms ease;
+  opacity: 0;
+  transform: translateY(var(--gap-base));
+}
+section#info-container.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+section#info-container > button {
+  padding: var(--gap-base);
+  border-radius: var(--gap-base);
+  cursor: pointer;
+  background-color: var(--main);
+  color: var(--font);
+  font-weight: bold;
+  border: none;
+  opacity: 0.8;
+}
+section#info-container > button:active {
+  opacity: 1;
 }
 section#cpu-container > div.board-container > .cell:not(.hit):active {
   opacity: 1;
@@ -192,6 +216,9 @@ section#cpu-container > div.board-container > .cell:active {
     cursor: crosshair;
   }
   section#cpu-container > div.board-container > .cell:not(.hit):hover {
+    opacity: 1;
+  }
+  section#info-container > button:hover {
     opacity: 1;
   }
 }

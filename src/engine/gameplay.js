@@ -22,13 +22,17 @@ export class Game {
     const shot = this.cpu.attack(this.player1.gameboard);
     if (this.player1.gameboard.allShipsSunk())
       return { gameResult: 'CPU wins!' };
+
     if (shot?.result === 'hit' || shot?.result === 'sunk') {
       this.onTheMove = this.cpu;
       return shot;
-    } else {
+    }
+    if (shot?.result === 'miss') {
       this.onTheMove = this.player1;
       return shot;
     }
+    // shot is undefined — do not change onTheMove; allow CPU loop to schedule next attempt
+    return shot;
   }
 
   // Coordinates delivered by UI

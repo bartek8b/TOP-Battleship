@@ -59,7 +59,7 @@ export class CPU extends Player {
               const nc = c + dc;
               // If in bounds of gameboard
               if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10) {
-                // Delete form possibleMoves
+                // Delete from possibleMoves
                 this.possibleMoves = this.possibleMoves.filter(
                   ([row, col]) => !(row === nr && col === nc),
                 );
@@ -81,6 +81,7 @@ export class CPU extends Player {
     let idx;
     let row, col;
     let shot = null;
+    let attempted = false;
 
     while (this.possibleMoves.length > 0) {
       idx = getRandomIntBetween(0, this.possibleMoves.length - 1);
@@ -93,20 +94,22 @@ export class CPU extends Player {
         continue;
       }
 
-      // Try attack; if it throws, skip and continue
+      // Try attack; if it throws, mark attempted and continue
       try {
         shot = enemyBoard.receiveAttack(row, col);
+        attempted = true;
       } catch {
+        attempted = true;
         // Try next move
         continue;
       }
 
-      // Got a valid shot result
+      // Got a valid shot result (may be undefined if tests mocked it)
       break;
     }
 
-    if (!shot) {
-      // No valid moves left (all remaining were invalid)
+    if (!attempted) {
+      // We never called receiveAttack because all remaining possibleMoves were skipped
       throw new Error('No moves left');
     }
 
@@ -122,6 +125,8 @@ export class CPU extends Player {
   }
 
   // Helper for inteligent attack when ship hit
+  // IMPORTANT: This function performs AT MOST ONE real attack (one call to enemyBoard.receiveAttack).
+  // That allows Game.startCpuLoop to schedule delays between CPU shots (for UI/animations).
   targetAttack(enemyBoard) {
     let shot = null;
     // In case we're not in target mode, fallback to random
@@ -132,14 +137,12 @@ export class CPU extends Player {
       const [row, col] = this.movesStreak[0];
 
       // Remove diagonal neighbor positions from possibleMoves, as ships can't have segments there
-      //Variations
       const impossiblePos = [
         [1, 1],
         [-1, 1],
         [-1, -1],
         [1, -1],
       ];
-      // Deletion
       for (let [dr, dc] of impossiblePos) {
         const removeRow = row + dr;
         const removeCol = col + dc;
@@ -151,8 +154,6 @@ export class CPU extends Player {
         }
       }
 
-      // Push into this.possibleMoves positions where ship's can be
-      //Variations
       const possiblePos = [
         [1, 0],
         [0, 1],
@@ -160,7 +161,6 @@ export class CPU extends Player {
         [0, -1],
       ];
 
-      // Insert
       for (let [dr, dc] of possiblePos) {
         const insertRow = row + dr;
         const insertCol = col + dc;
@@ -172,45 +172,33 @@ export class CPU extends Player {
         }
       }
 
-      // Try candidateMoves until we find a valid (non-attacked) shot or run out
+      // Perform at most ONE attack from candidateMoves (pick random)
       if (this.candidateMoves.length > 0) {
-        shot = null;
-        while (this.candidateMoves.length > 0) {
-          const idx = getRandomIntBetween(0, this.candidateMoves.length - 1);
-          const [attackRow, attackCol] = this.candidateMoves.splice(idx, 1)[0];
+        const idx = getRandomIntBetween(0, this.candidateMoves.length - 1);
+        const [attackRow, attackCol] = this.candidateMoves.splice(idx, 1)[0];
 
-          // skip if already attacked (defensive)
-          if (
-            enemyBoard?.grid?.[attackRow]?.[attackCol] === 'hit' ||
-            enemyBoard?.grid?.[attackRow]?.[attackCol] === 'miss'
-          ) {
-            continue;
-          }
-
-          try {
-            shot = enemyBoard.receiveAttack(attackRow, attackCol);
-          } catch {
-            shot = null;
-            continue;
-          }
-
-          // valid shot found — handle results and exit loop
-          if (shot?.result === 'hit') {
-            this.movesStreak.push([attackRow, attackCol]);
-          }
-          if (shot?.result === 'sunk') {
-            this.removeAdjacentToSunkShip(shot.ship, enemyBoard);
-            this.movesStreak = [];
-            this.mode = 'random';
-          }
-          break;
+        // defensive: if already attacked, skip this attempt (return undefined so gameplay won't switch turn)
+        if (
+          enemyBoard?.grid?.[attackRow]?.[attackCol] === 'hit' ||
+          enemyBoard?.grid?.[attackRow]?.[attackCol] === 'miss'
+        ) {
+          return undefined;
         }
 
-        // If we didn't find any valid candidate shot, fallback to randomAttack
-        if (!shot) {
-          this.mode = 'random';
+        try {
+          shot = enemyBoard.receiveAttack(attackRow, attackCol);
+        } catch {
+          // on error, don't change turn — let cpu loop try again next tick
+          return undefined;
+        }
+
+        if (shot?.result === 'hit') {
+          this.movesStreak.push([attackRow, attackCol]);
+        }
+        if (shot?.result === 'sunk') {
+          this.removeAdjacentToSunkShip(shot.ship, enemyBoard);
           this.movesStreak = [];
-          return this.randomAttack(enemyBoard);
+          this.mode = 'random';
         }
       } else {
         // Fallback if no candidateMoves
@@ -218,9 +206,7 @@ export class CPU extends Player {
         this.movesStreak = [];
         return this.randomAttack(enemyBoard);
       }
-    }
-
-    if (this.movesStreak.length > 1) {
+    } else if (this.movesStreak.length > 1) {
       // Determine the orientation of the streak
       const [r1] = this.movesStreak[0];
       const [r2] = this.movesStreak[1];
@@ -245,63 +231,49 @@ export class CPU extends Player {
           [tail[0], tail[1] + 1],
         ];
       }
+
       // Check only the cells at the ends of the streak for possible moves
       this.candidateMoves = [];
-      for (let [row, col] of ends) {
-        const idx = this.possibleMoves.findIndex(
-          ([r, c]) => r === row && c === col,
-        );
-        if (idx !== -1) {
-          this.candidateMoves.push([row, col]);
-        }
+      for (let [r, c] of ends) {
+        const idx = this.possibleMoves.findIndex(([rr, cc]) => rr === r && cc === c);
+        if (idx !== -1) this.candidateMoves.push([r, c]);
       }
+
       if (this.candidateMoves.length > 0) {
-        // Try candidateMoves until we find a valid (non-attacked) shot or run out
-        shot = null;
-        while (this.candidateMoves.length > 0) {
-          const idx = getRandomIntBetween(0, this.candidateMoves.length - 1);
-          const [attackRow, attackCol] = this.candidateMoves.splice(idx, 1)[0];
+        // pick a single candidate and perform at most one attack
+        const idx = getRandomIntBetween(0, this.candidateMoves.length - 1);
+        const [attackRow, attackCol] = this.candidateMoves.splice(idx, 1)[0];
 
-          // skip if already attacked (defensive)
-          if (
-            enemyBoard?.grid?.[attackRow]?.[attackCol] === 'hit' ||
-            enemyBoard?.grid?.[attackRow]?.[attackCol] === 'miss'
-          ) {
-            continue;
-          }
-
-          try {
-            shot = enemyBoard.receiveAttack(attackRow, attackCol);
-          } catch {
-            shot = null;
-            continue;
-          }
-
-          // valid shot found — handle results and exit loop
-          if (shot?.result === 'hit') {
-            this.movesStreak.push([attackRow, attackCol]);
-          }
-          if (shot?.result === 'sunk') {
-            this.removeAdjacentToSunkShip(shot.ship, enemyBoard);
-            this.movesStreak = [];
-            this.mode = 'random';
-          }
-          break;
+        if (
+          enemyBoard?.grid?.[attackRow]?.[attackCol] === 'hit' ||
+          enemyBoard?.grid?.[attackRow]?.[attackCol] === 'miss'
+        ) {
+          return undefined;
         }
 
-        // If we didn't find any valid candidate shot, fallback to randomAttack
-        if (!shot) {
-          this.mode = 'random';
+        try {
+          shot = enemyBoard.receiveAttack(attackRow, attackCol);
+        } catch {
+          return undefined;
+        }
+
+        if (shot?.result === 'hit') {
+          this.movesStreak.push([attackRow, attackCol]);
+        }
+        if (shot?.result === 'sunk') {
+          this.removeAdjacentToSunkShip(shot.ship, enemyBoard);
           this.movesStreak = [];
-          return this.randomAttack(enemyBoard);
+          this.mode = 'random';
         }
       } else {
-        // If there are no candidate moves at all, revert to random mode
+        // fallback
         this.mode = 'random';
         this.movesStreak = [];
         return this.randomAttack(enemyBoard);
       }
     }
+
+    // If no attack was made above, randomAttack will be called by the final return below
     return shot || this.randomAttack(enemyBoard);
   }
 
