@@ -16,9 +16,9 @@ export function init() {
   );
   messageBoard.welcome();
   // Show placeShips prompt (includes "Random" button)
-  setTimeout(() => messageBoard.placeShips(), 800);
+  setTimeout(() => messageBoard.placeShips(), 50);
 
-  // Place ships randomly (temporary)
+  // CPU places ships immediately
   game.cpu.randomShipsPlacement();
   updateGrid(game.cpu);
 
@@ -52,7 +52,7 @@ export function init() {
 
       // If CPU starts, begin cpu loop (it will only run if game.onTheMove === cpu)
       if (game.onTheMove === game.cpu) {
-        game.startCpuLoop(500, (cpuShot) => {
+        game.startCpuLoop(50, (cpuShot) => {
           if (!cpuShot) return;
           if (cpuShot.result === 'miss') {
             messageBoard.miss(game.cpu);
@@ -60,6 +60,10 @@ export function init() {
             messageBoard.accurate(game.cpu);
           } else if (cpuShot.result === 'sunk') {
             messageBoard.sunk(game.cpu, cpuShot.ship);
+          } else if (cpuShot.gameResult) {
+            messageBoard.allSunk(game.cpu);
+          } else if (cpuShot.error) {
+            messageBoard.show(`Error: ${cpuShot.error}`, 2000);
           }
           updateGrid(game.player1);
         });
