@@ -87,24 +87,24 @@ export class MessageBoard {
 
   miss(player) {
     this.hide();
-    this._delayedShow(`${player.name} missed!`, 1500);
+    this._delayedShow(`${player.name} missed!`, 500);
   }
 
   accurate(player) {
     this.hide();
-    this._delayedShow(`${player.name} hit the opponent's ship!`, 1500);
+    this._delayedShow(`${player.name} hit the opponent's ship!`, 500);
   }
 
   sunk(player, ship) {
     this.hide();
-    this._delayedShow(`${player.name} sunk the opponent's ${ship.type}!`, 2200);
+    this._delayedShow(`${player.name} sunk the opponent's ${ship.type}!`, 1000);
   }
 
   allSunk(player) {
     this.hide();
     this._delayedShow(
       `${player.name} sunk the entire opponent's fleet! ${rematchBtn}`,
-      3500,
+      1500,
     );
   }
 }
