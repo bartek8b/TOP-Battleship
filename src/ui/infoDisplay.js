@@ -1,13 +1,13 @@
+import { UI_DURATIONS } from './uiConfig.js';
+
 export class MessageBoard {
-  // containerElement: optional DOM element. showDelay: ms before showing after hide.
-  constructor(containerElement = null, showDelay = 600) {
+  constructor(containerElement = null, showDelay = 150) {
     this.container = containerElement;
     this.showDelay = showDelay;
     this._showTimer = null;
     this._hideTimer = null;
   }
 
-  // Lazy-get the container (safe if module imported early)
   _getContainer() {
     if (!this.container) {
       this.container = document.getElementById('info-container');
@@ -15,7 +15,6 @@ export class MessageBoard {
     return this.container;
   }
 
-  // Clear pending timers
   _clearTimers() {
     if (this._showTimer) {
       clearTimeout(this._showTimer);
@@ -27,7 +26,7 @@ export class MessageBoard {
     }
   }
 
-  // Immediately show HTML. If duration (ms) provided, auto-hide after duration.
+  // Show immediately and optionally auto-hide after duration (ms)
   show(html, duration = null) {
     const container = this._getContainer();
     if (!container) return;
@@ -56,13 +55,12 @@ export class MessageBoard {
     this._clearTimers();
     container.classList.remove('visible');
 
-    // Remove global click block
     if (typeof document !== 'undefined' && document.body) {
       document.body.classList.remove('blocked');
     }
   }
 
-  // Show after configured delay (useful to allow hide animation before showing next message)
+  // Show after small delay (used only for welcome/placeShips)
   _delayedShow(html, duration = null) {
     this._clearTimers();
     this._showTimer = setTimeout(
@@ -71,44 +69,42 @@ export class MessageBoard {
     );
   }
 
-  // Public convenience methods
   welcome() {
     this.hide();
-    this._delayedShow('Battleship 1.0.0 by 8b', 2000);
+    this._delayedShow('Battleship 1.0.0 by 8b', UI_DURATIONS.start);
   }
 
   placeShips() {
     this.hide();
     this._delayedShow(
-      `Place your ships on the board or use ${placeShipsBtn}`,
-      3000,
+      `Place your ships on the board or use <button id="place-ships-btn">Random</button>`,
+      UI_DURATIONS.placeShips,
     );
   }
 
   miss(player) {
-    this.hide();
-    this._delayedShow(`${player.name} missed!`, 500);
+    this.show(`${player.name} missed!`, UI_DURATIONS.miss);
   }
 
   accurate(player) {
-    this.hide();
-    this._delayedShow(`${player.name} hit the opponent's ship!`, 500);
+    this.show(`${player.name} hit the opponent's ship!`, UI_DURATIONS.hit);
   }
 
   sunk(player, ship) {
-    this.hide();
-    this._delayedShow(`${player.name} sunk the opponent's ${ship.type}!`, 1000);
+    this.show(
+      `${player.name} sunk the opponent's ${ship.type}!`,
+      UI_DURATIONS.sunk,
+    );
   }
 
   allSunk(player) {
-    this.hide();
-    this._delayedShow(
-      `${player.name} sunk the entire opponent's fleet! ${rematchBtn}`,
-      1500,
+    this.show(
+      `${player.name} sunk the entire opponent's fleet! <button id="rematch-btn">Rematch</button>`,
+      UI_DURATIONS.gameOver,
     );
   }
+
+  error(text) {
+    this.show(`Error: ${text}`, UI_DURATIONS.error);
+  }
 }
-
-const placeShipsBtn = `<button id="place-ships-btn">Random</button>`;
-
-const rematchBtn = `<button id="rematch-btn">Rematch</button>`;

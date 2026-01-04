@@ -20,6 +20,7 @@ html {
   --bg: #000050;
   --main: #00ff40b3;
   --font: #d3d3d3;
+  --fire: tomato;
 
   --gap-base: 0.5rem;
   --cell-size: 40px;
@@ -112,9 +113,7 @@ section#info-container {
   min-height: calc(var(--gap-base) * 6);
   display: flex;
   flex-direction: row;
-  transition:
-    transform 600ms ease,
-    opacity 600ms ease;
+  /* transition removed to avoid delayed paint issues */
   opacity: 0;
   transform: translateY(var(--gap-base));
 }
@@ -137,7 +136,7 @@ section#info-container > button:active {
 }
 section#cpu-container > div.board-container > .cell:not(.hit):active {
   opacity: 1;
-  background: linear-gradient(var(--main), tomato);
+  background: linear-gradient(var(--main), var(--fire));
 }
 section#plr-container {
   grid-area: plr;
@@ -193,7 +192,7 @@ svg {
 }
 .cell.hit {
   background-color: var(--bg) !important;
-  border: 2px solid tomato;
+  border: 2px solid var(--fire);
 }
 .cell.miss {
   opacity: 0.3 !important;
