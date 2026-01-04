@@ -1,8 +1,8 @@
 import { updateGrid } from './renderBoard';
+import { UI_DURATIONS } from './uiConfig.js';
 
 // setListeners(game, messageBoard) - attach delegated click listener for CPU board clicks.
 // Uses event delegation on document so it survives DOM rebuilds of the board.
-
 export function setListeners(game, messageBoard) {
   // Guard: attach only once globally
   if (document._cpuCellClickListenerAttached) return;
@@ -37,46 +37,44 @@ export function setListeners(game, messageBoard) {
       return;
     }
 
-    // Update CPU board after player's shot
+    // Update CPU board after player's shot (render before showing message)
     updateGrid(game.cpu);
 
-    // Show message for player's shot (MessageBoard handles delayed show/hide)
+    // Show message for player's shot using UI_DURATIONS
     if (shot?.result === 'hit') {
-      messageBoard.accurate(game.player1);
+      messageBoard.show(`${game.player1.name} hit the opponent's ship!`, UI_DURATIONS.hit);
     } else if (shot?.result === 'sunk') {
-      messageBoard.sunk(game.player1, shot.ship);
+      messageBoard.show(`${game.player1.name} sunk the opponent's ${shot.ship.type}!`, UI_DURATIONS.sunk);
     } else if (shot?.result === 'miss') {
-      messageBoard.miss(game.player1);
+      messageBoard.show(`${game.player1.name} missed!`, UI_DURATIONS.miss);
     } else if (shot?.gameResult) {
-      // player won
-      messageBoard.allSunk(game.player1);
+      messageBoard.show(`${game.player1.name} sunk the entire opponent's fleet!`, UI_DURATIONS.gameOver);
     } else if (shot?.error) {
-      messageBoard.show(`Error: ${shot.error}`, 2000);
+      messageBoard.show(`Error: ${shot.error}`, UI_DURATIONS.error);
     }
 
     // If player's shot produced a miss and control passed to CPU, start engine loop.
-    if (
-      prevMove === game.player1 &&
-      game.onTheMove === game.cpu &&
-      !game.gameOver
-    ) {
-      // Provide callback to update player grid after each cpuMove and show messages
-      game.startCpuLoop(50, (cpuShot) => {
+    // Use base delay derived from UI_DURATIONS.miss so CPU waits while message visible
+    if (prevMove === game.player1 && game.onTheMove === game.cpu && !game.gameOver) {
+      const baseDelay = UI_DURATIONS.miss;
+      game.startCpuLoop(baseDelay, (cpuShot) => {
         if (!cpuShot) return;
-        if (cpuShot.result === 'miss') {
-          messageBoard.miss(game.cpu);
-        } else if (cpuShot.result === 'hit') {
-          messageBoard.accurate(game.cpu);
-        } else if (cpuShot.result === 'sunk') {
-          messageBoard.sunk(game.cpu, cpuShot.ship);
-        } else if (cpuShot.gameResult) {
-          messageBoard.allSunk(game.cpu);
-        } else if (cpuShot.error) {
-          messageBoard.show(`Error: ${cpuShot.error}`, 2000);
-        }
 
-        // Update player grid after CPU shot
+        // Update player grid before showing message so board reflects hit/miss immediately
         updateGrid(game.player1);
+
+        // Show CPU shot messages using UI_DURATIONS
+        if (cpuShot.result === 'miss') {
+          messageBoard.show(`${game.cpu.name} missed!`, UI_DURATIONS.miss);
+        } else if (cpuShot.result === 'hit') {
+          messageBoard.show(`${game.cpu.name} hit your ship!`, UI_DURATIONS.hit);
+        } else if (cpuShot.result === 'sunk') {
+          messageBoard.show(`${game.cpu.name} sunk your ${cpuShot.ship.type}!`, UI_DURATIONS.sunk);
+        } else if (cpuShot.gameResult) {
+          messageBoard.show(`${game.cpu.name} sunk your entire fleet!`, UI_DURATIONS.gameOver);
+        } else if (cpuShot.error) {
+          messageBoard.show(`Error: ${cpuShot.error}`, UI_DURATIONS.error);
+        }
       });
     }
   });
