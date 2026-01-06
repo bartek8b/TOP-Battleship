@@ -20,7 +20,6 @@ html {
   --bg: #000050;
   --main: #00ff40b3;
   --font: #d3d3d3;
-  --fire: tomato;
 
   --gap-base: 0.5rem;
   --cell-size: 40px;
@@ -106,6 +105,10 @@ main > section {
   gap: calc(var(--gap-base) * 2);
   text-align: center;
 }
+
+/* Info container:
+   - no global transition by default (so immediate game messages are visible instantly)
+   - an .animated class enables transitions for welcome/placeShips only */
 section#info-container {
   color: var(--main);
   font-size: 2rem;
@@ -113,14 +116,19 @@ section#info-container {
   min-height: calc(var(--gap-base) * 6);
   display: flex;
   flex-direction: row;
-  /* transition removed to avoid delayed paint issues */
   opacity: 0;
   transform: translateY(var(--gap-base));
+}
+section#info-container.animated {
+  transition:
+    transform 600ms ease,
+    opacity 600ms ease;
 }
 section#info-container.visible {
   opacity: 1;
   transform: translateY(0);
 }
+
 section#info-container > button {
   padding: var(--gap-base);
   border-radius: var(--gap-base);
@@ -135,8 +143,9 @@ section#info-container > button:active {
   opacity: 1;
 }
 section#cpu-container > div.board-container > .cell:not(.hit):active {
+  /* active visual when player is allowed to click (overridden during cpu-turn) */
   opacity: 1;
-  background: linear-gradient(var(--main), var(--fire));
+  background: linear-gradient(var(--main), tomato);
 }
 section#plr-container {
   grid-area: plr;
@@ -158,16 +167,17 @@ div.board-container > .cell {
   width: auto;
   border-radius: calc(var(--gap-base) / 2);
   opacity: 0.6;
-  & svg {
-    fill: var(--font);
-  }
-  &.hit {
-    opacity: 0.9;
-  }
-  &.ship {
-    opacity: 0.9;
-  }
 }
+div.board-container > .cell svg {
+  fill: var(--font);
+}
+div.board-container > .cell.hit {
+  opacity: 0.9;
+}
+div.board-container > .cell.ship {
+  opacity: 0.9;
+}
+
 div.fleet-container {
   display: flex;
   flex-direction: column;
@@ -192,7 +202,7 @@ svg {
 }
 .cell.hit {
   background-color: var(--bg) !important;
-  border: 2px solid var(--fire);
+  border: 2px solid tomato;
 }
 .cell.miss {
   opacity: 0.3 !important;
@@ -205,18 +215,55 @@ svg {
   cursor: default !important;
 }
 
-/* Click & hover effects only on CPU board */
+/* Default (when it is player's turn): show crosshair and hover effects on CPU board */
+body:not(.cpu-turn) section#cpu-container > div.board-container {
+  cursor: crosshair;
+}
+body:not(.cpu-turn)
+  section#cpu-container
+  > div.board-container
+  > .cell:not(.hit):hover {
+  opacity: 1;
+}
+
+/* Active press gradient only when NOT cpu-turn */
+body:not(.cpu-turn)
+  section#cpu-container
+  > div.board-container
+  > .cell:not(.hit):active {
+  opacity: 1;
+  background: linear-gradient(var(--main), tomato);
+}
+
+/* --- when CPU turn: visually mute hover/active effects and use default cursor --- */
+body.cpu-turn section#cpu-container > div.board-container,
+body.cpu-turn section#cpu-container > div.board-container > .cell {
+  cursor: default !important;
+}
+
+/* Remove hover/active visual changes during CPU turn (purely visual; clicks can still be blocked elsewhere) */
+body.cpu-turn
+  section#cpu-container
+  > div.board-container
+  > .cell:not(.hit):hover,
+body.cpu-turn
+  section#cpu-container
+  > div.board-container
+  > .cell:not(.hit):active {
+  opacity: 0.6 !important;
+  background: var(--main) !important;
+  background-image: none !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Click & hover effects only on CPU board (redundant fallback) */
 section#cpu-container > div.board-container > .cell:active {
   opacity: 1;
 }
 
 @media (hover: hover) {
-  section#cpu-container > div.board-container:hover {
-    cursor: crosshair;
-  }
-  section#cpu-container > div.board-container > .cell:not(.hit):hover {
-    opacity: 1;
-  }
+  /* Non-cpu-turn hover behaviour kept above with body:not(.cpu-turn) */
   section#info-container > button:hover {
     opacity: 1;
   }

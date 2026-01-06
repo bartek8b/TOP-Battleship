@@ -13,8 +13,17 @@ export function init() {
   const messageBoard = new MessageBoard(
     document.getElementById('info-container'),
   );
+
+  // Show welcome first
   messageBoard.welcome();
-  setTimeout(() => messageBoard.placeShips(), UI_DURATIONS.placeShips);
+
+  // Schedule placeShips to appear after welcome finished.
+  // Use messageBoard.showDelay (time before welcome actually shows) + UI_DURATIONS.start (how long welcome stays)
+  // plus smallGap to ensure ordering.
+  const smallGap = 200;
+  const welcomeDelay =
+    (messageBoard.showDelay || 0) + (UI_DURATIONS.start || 0) + smallGap;
+  setTimeout(() => messageBoard.placeShips(), welcomeDelay);
 
   // CPU places ships immediately
   game.cpu.randomShipsPlacement();
@@ -78,7 +87,7 @@ export function init() {
             }
             return baseDelay;
           });
-        }, UI_DURATIONS.start || UI_DURATIONS.miss);
+        }, 0);
       }
     }
 

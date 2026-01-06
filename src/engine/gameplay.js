@@ -20,15 +20,24 @@ export class Game {
     this._cpuLoopTimer = null;
   }
 
+  // Helper to toggle a body class so CSS can react to CPU turn.
+  _setCpuTurnClass(enable) {
+    if (typeof document === 'undefined' || !document.body) return;
+    if (enable) document.body.classList.add('cpu-turn');
+    else document.body.classList.remove('cpu-turn');
+  }
+
   // Automated CPU attack
   cpuMove() {
     // If player's fleet is already sunk, return immediate game result (avoid calling cpu.attack)
     if (this.player1.gameboard.allShipsSunk()) {
       this.gameOver = true;
       this.onTheMove = null;
+      // ensure CPU loop will stop
       return { gameResult: 'CPU wins!' };
     }
 
+    // Perform one CPU attack (may throw) — protect with try/catch
     let shot;
     try {
       shot = this.cpu.attack(this.player1.gameboard);
@@ -39,6 +48,7 @@ export class Game {
         clearTimeout(this._cpuLoopTimer);
         this._cpuLoopTimer = null;
       }
+      // mark game as over to block further clicks
       this.gameOver = true;
       this.onTheMove = null;
       return { error: e?.message || String(e) };
@@ -51,6 +61,7 @@ export class Game {
       return { gameResult: 'CPU wins!' };
     }
 
+    // Normal flow: set onTheMove according to shot result
     if (shot?.result === 'hit' || shot?.result === 'sunk') {
       this.onTheMove = this.cpu;
       return shot;
@@ -65,10 +76,12 @@ export class Game {
 
   // Coordinates delivered by UI
   player1Move(row, col) {
+    // If game is over, do not accept moves
     if (this.gameOver) return { error: 'Game is over' };
 
     const shot = this.cpu.gameboard.receiveAttack(row, col);
 
+    // If player's shot finished the CPU fleet
     if (this.cpu.gameboard.allShipsSunk()) {
       this.gameOver = true;
       this.onTheMove = null;
@@ -76,47 +89,55 @@ export class Game {
     }
 
     if (shot?.result === 'hit' || shot?.result === 'sunk') {
+      // player hit -> keep player's turn
       this.onTheMove = this.player1;
       return shot;
     } else {
+      // miss -> CPU starts
       this.onTheMove = this.cpu;
       return shot;
     }
   }
 
   // Start CPU loop inside engine.
-  // delay: ms between cpu moves
-  // onIteration: optional callback(shot) executed after each cpuMove (useful for UI updates)
+  // delay: default ms between cpu moves when onIteration doesn't override
+  // onIteration: optional callback(shot) executed after each cpuMove; may return nextDelay (ms)
   startCpuLoop(delay = 500, onIteration = null) {
     if (this._cpuLoopRunning) return; // already running
     this._cpuLoopRunning = true;
 
+    // Mark UI as CPU turn so CSS can disable hover/cursor
+    this._setCpuTurnClass(true);
+
     const loop = () => {
       if (this.onTheMove !== this.cpu) {
+        // CPU no longer on turn -> stop and clear UI indicator
         this._cpuLoopRunning = false;
         this._cpuLoopTimer = null;
+        this._setCpuTurnClass(false);
         return;
       }
 
       const shot = this.cpuMove();
 
-      // call UI update callback if provided
+      // call UI update callback if provided; callback may return a delay (ms) for next iteration
       let returnedDelay = null;
       if (typeof onIteration === 'function') {
         try {
           returnedDelay = onIteration(shot);
         } catch {
-          /* noop */
+          /* swallow */
         }
       }
 
-      // If game result or error occurred, stop the loop
+      // If the shot indicates gameResult or error, stop the loop and clear UI indicator
       if (shot?.gameResult || shot?.error) {
         this._cpuLoopRunning = false;
         if (this._cpuLoopTimer) {
           clearTimeout(this._cpuLoopTimer);
           this._cpuLoopTimer = null;
         }
+        this._setCpuTurnClass(false);
         return;
       }
 
@@ -124,12 +145,12 @@ export class Game {
       const nextDelay =
         typeof returnedDelay === 'number' ? returnedDelay : delay;
 
-      // If still CPU turn (i.e. hit), schedule next iteration
       if (this.onTheMove === this.cpu) {
         this._cpuLoopTimer = setTimeout(loop, nextDelay);
       } else {
         this._cpuLoopRunning = false;
         this._cpuLoopTimer = null;
+        this._setCpuTurnClass(false);
       }
     };
 
@@ -143,17 +164,22 @@ export class Game {
       this._cpuLoopTimer = null;
     }
     this._cpuLoopRunning = false;
+    this._setCpuTurnClass(false);
   }
 
   resetGame() {
     this.player1 = new Player();
     this.cpu = new CPU();
 
+    // Switch starting player
     this.wasPlayerFirst = !this.wasPlayerFirst;
     this.firstToMove = this.wasPlayerFirst ? this.player1 : this.cpu;
     this.onTheMove = this.firstToMove;
 
+    // Reset game over flag
     this.gameOver = false;
+
+    // Reset internal loop state
     this.stopCpuLoop();
   }
 }
