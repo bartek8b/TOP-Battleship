@@ -1,7 +1,7 @@
 import { UI_DURATIONS } from './uiConfig.js';
 
 export class MessageBoard {
-  constructor(containerElement = null, showDelay = 150) {
+  constructor(containerElement = null, showDelay = 500) {
     this.container = containerElement;
     this.showDelay = showDelay;
     this._showTimer = null;
@@ -60,7 +60,7 @@ export class MessageBoard {
     }
   }
 
-  // Show after small delay (used only for welcome/placeShips)
+  // Show after configured delay (useful for welcome/placeShips)
   _delayedShow(html, duration = null) {
     this._clearTimers();
     this._showTimer = setTimeout(
@@ -69,6 +69,7 @@ export class MessageBoard {
     );
   }
 
+  // Public convenience methods — show immediately (no extra delay)
   welcome() {
     this.hide();
     this._delayedShow('Battleship 1.0.0 by 8b', UI_DURATIONS.start);

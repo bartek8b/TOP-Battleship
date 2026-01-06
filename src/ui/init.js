@@ -46,37 +46,39 @@ export function init() {
 
       if (game.onTheMove === game.cpu) {
         const baseDelay = UI_DURATIONS.miss;
-        game.startCpuLoop(baseDelay, (cpuShot) => {
-          if (!cpuShot) return baseDelay;
-          updateGrid(game.player1);
+        setTimeout(() => {
+          game.startCpuLoop(baseDelay, (cpuShot) => {
+            if (!cpuShot) return baseDelay;
+            updateGrid(game.player1);
 
-          if (cpuShot.result === 'miss') {
-            messageBoard.show(`${game.cpu.name} missed!`, UI_DURATIONS.miss);
-            return UI_DURATIONS.miss;
-          } else if (cpuShot.result === 'hit') {
-            messageBoard.show(
-              `${game.cpu.name} hit your ship!`,
-              UI_DURATIONS.hit,
-            );
-            return UI_DURATIONS.hit;
-          } else if (cpuShot.result === 'sunk') {
-            messageBoard.show(
-              `${game.cpu.name} sunk your ${cpuShot.ship.type}!`,
-              UI_DURATIONS.sunk,
-            );
-            return UI_DURATIONS.sunk;
-          } else if (cpuShot.gameResult) {
-            messageBoard.show(
-              `${game.cpu.name} sunk your entire fleet!`,
-              UI_DURATIONS.gameOver,
-            );
-            return UI_DURATIONS.gameOver;
-          } else if (cpuShot.error) {
-            messageBoard.show(`Error: ${cpuShot.error}`, UI_DURATIONS.error);
-            return UI_DURATIONS.error;
-          }
-          return baseDelay;
-        });
+            if (cpuShot.result === 'miss') {
+              messageBoard.show(`${game.cpu.name} missed!`, UI_DURATIONS.miss);
+              return UI_DURATIONS.miss;
+            } else if (cpuShot.result === 'hit') {
+              messageBoard.show(
+                `${game.cpu.name} hit your ship!`,
+                UI_DURATIONS.hit,
+              );
+              return UI_DURATIONS.hit;
+            } else if (cpuShot.result === 'sunk') {
+              messageBoard.show(
+                `${game.cpu.name} sunk your ${cpuShot.ship.type}!`,
+                UI_DURATIONS.sunk,
+              );
+              return UI_DURATIONS.sunk;
+            } else if (cpuShot.gameResult) {
+              messageBoard.show(
+                `${game.cpu.name} sunk your entire fleet!`,
+                UI_DURATIONS.gameOver,
+              );
+              return UI_DURATIONS.gameOver;
+            } else if (cpuShot.error) {
+              messageBoard.show(`Error: ${cpuShot.error}`, UI_DURATIONS.error);
+              return UI_DURATIONS.error;
+            }
+            return baseDelay;
+          });
+        }, UI_DURATIONS.start || UI_DURATIONS.miss);
       }
     }
 
