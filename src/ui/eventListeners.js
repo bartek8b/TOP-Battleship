@@ -45,10 +45,8 @@ export function setListeners(game, messageBoard) {
     } else if (shot?.result === 'miss') {
       messageBoard.show(`${game.player1.name} missed!`, UI_DURATIONS.miss);
     } else if (shot?.gameResult) {
-      messageBoard.show(
-        `${game.player1.name} sunk the entire opponent's fleet!`,
-        UI_DURATIONS.gameOver,
-      );
+      // Player1 won
+      messageBoard.allSunk(game.player1);
     } else if (shot?.error) {
       messageBoard.show(`Error: ${shot.error}`, UI_DURATIONS.error);
     }
@@ -85,10 +83,8 @@ export function setListeners(game, messageBoard) {
             );
             return UI_DURATIONS.sunk;
           } else if (cpuShot.gameResult) {
-            messageBoard.show(
-              `${game.cpu.name} sunk your entire fleet!`,
-              UI_DURATIONS.gameOver,
-            );
+            // CPU won
+            messageBoard.allSunk(game.cpu);
             return UI_DURATIONS.gameOver;
           } else if (cpuShot.error) {
             messageBoard.show(`Error: ${cpuShot.error}`, UI_DURATIONS.error);

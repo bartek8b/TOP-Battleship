@@ -76,10 +76,8 @@ export function init() {
               );
               return UI_DURATIONS.sunk;
             } else if (cpuShot.gameResult) {
-              messageBoard.show(
-                `${game.cpu.name} sunk your entire fleet!`,
-                UI_DURATIONS.gameOver,
-              );
+              // CPU won
+              messageBoard.allSunk(game.cpu);
               return UI_DURATIONS.gameOver;
             } else if (cpuShot.error) {
               messageBoard.show(`Error: ${cpuShot.error}`, UI_DURATIONS.error);
