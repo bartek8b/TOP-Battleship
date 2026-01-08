@@ -19,7 +19,8 @@ function resetGrid(player) {
 
 function updateGrid(player) {
   const arr = player.gameboard.grid;
-  
+  const sunkCells = player.gameboard?.sunkCells || new Set();
+
   const containerId =
     player.name === 'Player 1' ? 'plr-container' : 'cpu-container';
   const cells = document.querySelectorAll(
@@ -29,20 +30,25 @@ function updateGrid(player) {
   cells.forEach((cell) => {
     const x = Number(cell.dataset.x);
     const y = Number(cell.dataset.y);
+    const isSunkCell = sunkCells.has(`${x},${y}`) || arr[x][y] === 'sunk';
 
     cell.className = 'cell'; // reset
+    cell.innerHTML = '';
 
     if (arr[x][y] === 'miss') {
-      cell.classList.add('miss');
-      cell.classList.add('inactive');
+      cell.classList.add('miss', 'inactive');
     } else if (arr[x][y] === 'hit') {
       cell.innerHTML = hitSvg;
-      cell.classList.add('hit');
-      cell.classList.add('inactive');
+      cell.classList.add('hit', 'inactive');
+      if (isSunkCell) cell.classList.add('sunk');
+    } else if (arr[x][y] === 'sunk') {
+      cell.innerHTML = hitSvg;
+      cell.classList.add('hit', 'inactive', 'sunk');
     } else if (arr[x][y] instanceof Ship && player.name === 'Player 1') {
       // Show player 1's own ships on board
       cell.innerHTML = shipSvg;
       cell.classList.add('ship');
+      if (isSunkCell) cell.classList.add('sunk');
     }
   });
 }

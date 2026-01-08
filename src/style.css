@@ -173,9 +173,22 @@ div.board-container > .cell svg {
 }
 div.board-container > .cell.hit {
   opacity: 0.9;
+  background-color: var(--bg) !important;
+  border: 2px solid tomato;
 }
 div.board-container > .cell.ship {
   opacity: 0.9;
+  background-color: var(--bg) !important;
+  border: 2px solid var(--main);
+}
+div.board-container > .cell.miss {
+  opacity: 0.3 !important;
+}
+div.board-container > .cell.inactive {
+  cursor: default !important;
+}
+div.board-container > .cell.sunk svg {
+  fill: tomato !important;
 }
 
 div.fleet-container {
@@ -199,20 +212,6 @@ div.fleet-container > .ship {
 }
 svg {
   fill: inherit;
-}
-.cell.hit {
-  background-color: var(--bg) !important;
-  border: 2px solid tomato;
-}
-.cell.miss {
-  opacity: 0.3 !important;
-}
-.cell.ship {
-  background-color: var(--bg) !important;
-  border: 2px solid var(--main);
-}
-.cell.inactive {
-  cursor: default !important;
 }
 
 /* Default (when it is player's turn): show crosshair and hover effects on CPU board */

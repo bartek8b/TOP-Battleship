@@ -19,6 +19,10 @@ export class Gameboard {
 
     // List of ships placed on this board, used by allShipsSunk()
     this.fleet = [];
+
+    // Ship positions and sunk cells for UI highlighting
+    this.shipPositions = new Map(); // ship -> array<[row,col]>
+    this.sunkCells = new Set(); // "row,col"
   }
 
   // Helper to check if given cell is empty or nonexistent (out of bounds)
@@ -63,6 +67,8 @@ export class Gameboard {
     if (col < 0 || col > 9)
       throw new Error('The column index is out of bounds');
 
+    const coords = [];
+
     // Check if horizontal ship isn't out of bounds / overlap other ship / touch other ship
     if (ship.vertical === false) {
       if (col + ship.length - 1 <= 9) {
@@ -71,6 +77,7 @@ export class Gameboard {
         }
         for (let i = 0; i < ship.length; i++) {
           this.grid[row][col + i] = ship;
+          coords.push([row, col + i]);
         }
       } else {
         throw new Error('Cannot place ship out of bounds');
@@ -85,6 +92,7 @@ export class Gameboard {
         }
         for (let i = 0; i < ship.length; i++) {
           this.grid[row + i][col] = ship;
+          coords.push([row + i, col]);
         }
       } else {
         throw new Error('Cannot place ship out of bounds');
@@ -96,22 +104,37 @@ export class Gameboard {
 
     // Push ship into fleet array
     this.fleet.push(ship);
+
+    // Store ship coordinates for later highlighting
+    this.shipPositions.set(ship, coords);
   }
 
   receiveAttack(row, col) {
     if (row < 0 || row > 9 || col < 0 || col > 9)
       throw new Error('Cannot shot out of bounds');
 
-    if (this.grid[row][col] === 'hit' || this.grid[row][col] === 'miss')
+    if (
+      this.grid[row][col] === 'hit' ||
+      this.grid[row][col] === 'miss' ||
+      this.grid[row][col] === 'sunk'
+    )
       throw new Error('Cannot shot same cell twice');
 
     if (this.grid[row][col] instanceof Ship) {
       const ship = this.grid[row][col];
       ship.hit();
       this.grid[row][col] = 'hit';
-      return ship.isSunk()
-        ? { result: 'sunk', ship } 
-        : { result: 'hit', ship }; 
+
+      const sunk = ship.isSunk();
+      if (sunk) {
+        const positions = this.shipPositions.get(ship) || [];
+        positions.forEach(([r, c]) => {
+          this.grid[r][c] = 'sunk'; // oznacz całość w grid
+          this.sunkCells.add(`${r},${c}`); // i zapamiętaj do renderu
+        });
+      }
+
+      return sunk ? { result: 'sunk', ship } : { result: 'hit', ship };
     } else {
       this.grid[row][col] = 'miss';
       return { result: 'miss' };
