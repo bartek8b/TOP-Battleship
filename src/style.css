@@ -114,7 +114,7 @@ section#info-container {
   font-size: 2rem;
   grid-area: info;
   min-height: calc(var(--gap-base) * 6);
-  display: flex;
+  display: inline;
   flex-direction: row;
   opacity: 0;
   transform: translateY(var(--gap-base));
@@ -282,4 +282,26 @@ section#cpu-container > div.board-container > .cell:active {
     flex-wrap: wrap;
     margin-inline: 10%;
   }
+}
+
+/* --- Drag & Drop placement styles --- */
+div.fleet-container > .ship {
+  cursor: grab;
+  user-select: none;
+}
+div.fleet-container > .ship.dragging {
+  opacity: 0.5;
+}
+div.fleet-container > .ship.vertical {
+  transform: rotate(-90deg);
+}
+div.board-container > .cell.preview-ok {
+  outline: 2px solid var(--main);
+  background-color: var(--bg);
+}
+div.board-container > .cell.preview-bad {
+  outline: 2px solid tomato;
+}
+div.fleet-container > .ship:active {
+  cursor: grabbing;
 }

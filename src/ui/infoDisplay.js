@@ -78,7 +78,7 @@ export class MessageBoard {
   placeShips() {
     this.hide();
     this._delayedShow(
-      `Place your ships on the board or use <button id="place-ships-btn">Random</button>`,
+      `Place your ships on the board (change orientation by clicking on the ship) <br> or use button: <button id="place-ships-btn">Random</button>`,
       UI_DURATIONS.placeShips,
     );
   }
