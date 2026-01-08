@@ -18,14 +18,27 @@ export function init() {
   const fleetContainer = document.querySelector('.fleet-container');
   const initialFleetMarkup = fleetContainer?.innerHTML || '';
 
+  const hideFleetContainer = () => {
+    if (fleetContainer) fleetContainer.classList.add('fleet-hidden');
+  };
+  const showFleetContainer = () => {
+    if (fleetContainer) fleetContainer.classList.remove('fleet-hidden');
+  };
+
+  // Hide fleet until placeShips prompt appears
+  hideFleetContainer();
+
   // Show welcome first
   messageBoard.welcome();
 
-  // Schedule placeShips to appear after welcome finished.
+  // Schedule placeShips after welcome finishes
   const smallGap = 200;
   const welcomeDelay =
     (messageBoard.showDelay || 0) + (UI_DURATIONS.start || 0) + smallGap;
-  setTimeout(() => messageBoard.placeShips(), welcomeDelay);
+  setTimeout(() => {
+    messageBoard.placeShips();
+    showFleetContainer();
+  }, welcomeDelay);
 
   // CPU places ships immediately
   game.cpu.randomShipsPlacement();
@@ -60,7 +73,6 @@ export function init() {
       );
       return UI_DURATIONS.sunk;
     } else if (cpuShot.gameResult) {
-      // CPU won
       messageBoard.allSunk(game.cpu);
       return UI_DURATIONS.gameOver;
     } else if (cpuShot.error) {
@@ -94,7 +106,15 @@ export function init() {
     const grid = document.querySelector('#plr-container .board-container');
     if (!fleetContainer || !grid) return;
 
-    // Clear any old listeners by rebuilding grid (already done via resetGrid) and fleet innerHTML
+    // Remove previous DnD handlers to avoid duplicate placement on rematch
+    if (grid._dndHandlers) {
+      const { dragover, dragleave, drop } = grid._dndHandlers;
+      grid.removeEventListener('dragover', dragover);
+      grid.removeEventListener('dragleave', dragleave);
+      grid.removeEventListener('drop', drop);
+    }
+
+    // Clear any old preview classes
     const clearPreviews = () => {
       grid
         .querySelectorAll('.cell.preview-ok, .cell.preview-bad')
@@ -105,15 +125,39 @@ export function init() {
 
     const previewPlacement = (row, col, length, vertical) => {
       clearPreviews();
-      // quick bounds check to avoid creating a ship when obviously OOB
       if (row < 0 || col < 0) return;
-      const ship = new Ship(length, vertical);
-      const canPlace = game.player1.gameboard.canPlaceShip(ship, row, col);
+
+      // Detect out-of-bounds segments
+      let outOfBounds = false;
       for (let i = 0; i < length; i++) {
         const r = vertical ? row + i : row;
         const c = vertical ? col : col + i;
-        const cell = grid.querySelector(`.cell[data-x="${r}"][data-y="${c}"]`);
+        if (r < 0 || r > 9 || c < 0 || c > 9) {
+          outOfBounds = true;
+          break;
+        }
+      }
+
+      const ship = new Ship(length, vertical);
+      // canPlaceShip does not treat OOB as invalid, so combine with outOfBounds
+      const canPlaceBase = game.player1.gameboard.canPlaceShip(ship, row, col);
+      const canPlace = !outOfBounds && canPlaceBase;
+
+      for (let i = 0; i < length; i++) {
+        const r = vertical ? row + i : row;
+        const c = vertical ? col : col + i;
+        const cell = grid.querySelector(
+          `.cell[data-x="${r}"][data-y="${c}"]`,
+        );
         if (cell) cell.classList.add(canPlace ? 'preview-ok' : 'preview-bad');
+      }
+
+      // If any part is out of bounds, mark the anchor cell as bad
+      if (outOfBounds) {
+        const anchorCell = grid.querySelector(
+          `.cell[data-x="${row}"][data-y="${col}"]`,
+        );
+        if (anchorCell) anchorCell.classList.add('preview-bad');
       }
     };
 
@@ -123,7 +167,7 @@ export function init() {
       }
     };
 
-    grid.addEventListener('dragover', (e) => {
+    const handleDragover = (e) => {
       if (!dragData) {
         try {
           dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
@@ -145,14 +189,14 @@ export function init() {
         dragData.length,
         dragData.orientation === 'vertical',
       );
-    });
+    };
 
-    grid.addEventListener('dragleave', (e) => {
-      // only clear if leaving the grid entirely
+    const handleDragleave = (e) => {
+      // Clear previews when leaving the grid entirely
       if (!grid.contains(e.relatedTarget)) clearPreviews();
-    });
+    };
 
-    grid.addEventListener('drop', (e) => {
+    const handleDrop = (e) => {
       e.preventDefault();
       const cell = e.target.closest('.cell');
       if (!cell) {
@@ -161,7 +205,6 @@ export function init() {
         return;
       }
 
-      // Recover data if not present
       if (!dragData) {
         try {
           dragData = JSON.parse(e.dataTransfer.getData('text/plain'));
@@ -189,9 +232,18 @@ export function init() {
       } catch (err) {
         messageBoard.error(err?.message || 'Cannot place ship here');
       }
-    });
+    };
 
-    // Make each fleet ship draggable & rotatable
+    grid.addEventListener('dragover', handleDragover);
+    grid.addEventListener('dragleave', handleDragleave);
+    grid.addEventListener('drop', handleDrop);
+    grid._dndHandlers = {
+      dragover: handleDragover,
+      dragleave: handleDragleave,
+      drop: handleDrop,
+    };
+
+    // Make each fleet ship draggable and rotatable
     const shipEls = fleetContainer.querySelectorAll('.ship');
     shipEls.forEach((shipEl, idx) => {
       const length =
@@ -249,7 +301,7 @@ export function init() {
     setupFleetDragAndDrop();
   };
 
-  // Enable manual placement initially
+  // Enable manual placement initially (hidden until placeShips is shown)
   resetPlayerForManualPlacement();
 
   document.addEventListener('click', (e) => {
@@ -264,6 +316,7 @@ export function init() {
       game.player1.randomShipsPlacement();
       updateGrid(game.player1);
       if (fleetContainer) fleetContainer.innerHTML = '';
+      hideFleetContainer();
       battleStarted = false;
       startBattle();
     }
@@ -283,6 +336,7 @@ export function init() {
       }
       setupFleetDragAndDrop();
       messageBoard.placeShips();
+      showFleetContainer();
     }
   });
 }
